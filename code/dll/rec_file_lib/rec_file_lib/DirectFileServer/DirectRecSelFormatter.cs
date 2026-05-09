@@ -24,84 +24,33 @@ internal sealed class DirectRecSelFormatter
 
     public string FormatRecordSet(RecRecordSet? recordSet)
     {
-        return FormatRecordSet(recordSet, projectedFields: null, selectedIndexes: null, quickFilter: null);
-    }
-
-    public string FormatRecordSet(
-        RecRecordSet? recordSet,
-        IReadOnlySet<string>? projectedFields,
-        IReadOnlySet<int>? selectedIndexes,
-        string? quickFilter)
-    {
         if (recordSet is null)
         {
             return string.Empty;
         }
 
         using var writer = new StringWriter();
-        WriteRecordSetRecords(writer, recordSet, projectedFields, selectedIndexes, quickFilter);
+        WriteRecordSetRecords(writer, recordSet);
         return writer.ToString().TrimEnd('\r', '\n');
     }
 
-    private static void WriteRecordSetRecords(
-        TextWriter writer,
-        RecRecordSet recordSet,
-        IReadOnlySet<string>? projectedFields,
-        IReadOnlySet<int>? selectedIndexes,
-        string? quickFilter)
+    private static void WriteRecordSetRecords(TextWriter writer, RecRecordSet recordSet)
     {
-        var hasWrittenRecord = false;
-
         for (var recordIndex = 0; recordIndex < recordSet.Records.Count; recordIndex++)
         {
-            if (selectedIndexes is not null && !selectedIndexes.Contains(recordIndex))
-            {
-                continue;
-            }
-
-            var record = recordSet.Records[recordIndex];
-            if (!MatchesQuickFilter(record, quickFilter))
-            {
-                continue;
-            }
-
-            if (hasWrittenRecord)
+            if (recordIndex > 0)
             {
                 writer.WriteLine();
             }
 
-            WriteRecord(writer, record, projectedFields);
-            hasWrittenRecord = true;
+            WriteRecord(writer, recordSet.Records[recordIndex]);
         }
     }
 
-    private static bool MatchesQuickFilter(RecRecord record, string? quickFilter)
-    {
-        if (string.IsNullOrEmpty(quickFilter))
-        {
-            return true;
-        }
-
-        foreach (var field in record.Fields)
-        {
-            if (field.Value.Contains(quickFilter, StringComparison.Ordinal))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static void WriteRecord(TextWriter writer, RecRecord record, IReadOnlySet<string>? projectedFields)
+    private static void WriteRecord(TextWriter writer, RecRecord record)
     {
         foreach (var field in record.Fields)
         {
-            if (projectedFields is not null && !projectedFields.Contains(field.Name))
-            {
-                continue;
-            }
-
             WriteField(writer, field);
         }
     }

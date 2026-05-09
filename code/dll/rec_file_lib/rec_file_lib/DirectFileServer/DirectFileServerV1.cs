@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using rec_file_lib.Query;
 
 namespace rec_file_lib.DirectFileServer
 {
@@ -12,6 +13,7 @@ namespace rec_file_lib.DirectFileServer
         private readonly DirectFileServerDocumentStore _documentStore = new();
         private readonly DirectRecSelFormatter _recSelFormatter = new();
         private readonly DirectRecMutationParser _mutationParser = new();
+        private readonly RecSelectionQueryEngine _selectionQueryEngine = new();
 
         public string RecSel(string filePath, RecSelOptions? options)
         {
@@ -23,15 +25,16 @@ namespace rec_file_lib.DirectFileServer
                 return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
             }
 
-            var projectedFields = ParseProjectedFields(options?.Project?.FieldNames);
-            var selectedIndexes = ParseSelectedIndexes(options?.Select?.Indexes);
-            var quickFilter = ParseQuickFilter(options?.Select?.Quick);
+            var queryOptions = new RecSelectionQueryOptions(
+                ProjectedFields: ParseProjectedFields(options?.Project?.FieldNames),
+                SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
+                QuickFilter: ParseQuickFilter(options?.Select?.Quick));
 
-            return _recSelFormatter.FormatRecordSet(
+            var selectedRecordSet = _selectionQueryEngine.Select(
                 _documentStore.FindRecordSet(recordType),
-                projectedFields,
-                selectedIndexes,
-                quickFilter);
+                queryOptions);
+
+            return _recSelFormatter.FormatRecordSet(selectedRecordSet);
         }
 
         public string RecInsType(string filePath, string recordType, string recordText)
