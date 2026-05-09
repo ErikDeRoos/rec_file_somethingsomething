@@ -30,6 +30,18 @@ namespace rec_file_lib
         public const string DirectFileServer_IRecSelSortOptions = "78f2fb80-5a8d-4102-bc2b-44cf257a8d9c";
         public const string DirectFileServer_RecSelSortOptions = "28b87792-9aad-4224-a6af-6d15f4dc423d";
 
+        public const string DirectFileServer_IRecSelTypedResult = "e1a0f6b0-97ac-4b56-8122-94f5a5a4c903";
+        public const string DirectFileServer_RecSelTypedResult = "8e9d8a64-f315-4fd2-a4de-8df91053d5d9";
+
+        public const string DirectFileServer_IRecSelTypedRecordSet = "2f568b33-f904-4efd-aac0-14d95d553d79";
+        public const string DirectFileServer_RecSelTypedRecordSet = "9f8b901d-6720-4d79-838a-66386ac2e2fb";
+
+        public const string DirectFileServer_IRecSelTypedRecord = "8f631855-4df9-4728-b860-cc3b0175d7cd";
+        public const string DirectFileServer_RecSelTypedRecord = "f16b83d8-8fa4-4cb2-a129-c4f5c42f9f8b";
+
+        public const string DirectFileServer_IRecSelTypedField = "4d6f503f-c783-4327-aae1-8b48ec4e8d3e";
+        public const string DirectFileServer_RecSelTypedField = "f42640f6-c1cd-4da9-a404-e2c711690f80";
+
         public const string SqlFileServer_Interface = "8752b361-a871-4fa7-bafc-89850fcf42d0";
         public const string SqlFileServer_Implementation_V1 = "d293041b-3aa4-4b1e-9592-a53ee508372a";
     }

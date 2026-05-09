@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using rec_file_lib.Model;
 using rec_file_lib.Query;
 
 namespace rec_file_lib.DirectFileServer
@@ -27,25 +28,53 @@ namespace rec_file_lib.DirectFileServer
                 return _recSelFormatter.FormatSelection(_documentStore.GetDocument(), collapse, includeDescriptors);
             }
 
-            var document = _documentStore.GetDocument();
-            var queryOptions = new RecSelectionQueryOptions(
-                ProjectedFields: ParseProjectedFields(options?.Project?.FieldNames),
-                SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
-                QuickFilter: ParseQuickFilter(options?.Select?.Quick),
-                Expression: ParseExpression(options?.Select?.Expression),
-                JoinField: ParseJoinField(options?.Select?.JoinField),
-                GroupByFields: ParseGroupByFields(options?.Group?.FieldNames),
-                Count: options?.Aggregate?.Count ?? false,
-                CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName),
-                SortFields: ParseSortFields(options?.Sort?.FieldNames),
-                Uniq: options?.Select?.Uniq ?? false);
-
-            var selectedRecordSet = _selectionQueryEngine.Select(
-                document,
-                _documentStore.FindRecordSet(recordType),
-                queryOptions);
-
+            var selectedRecordSet = SelectRecordSet(_documentStore.GetDocument(), recordType, options);
             return _recSelFormatter.FormatRecordSet(selectedRecordSet, collapse, includeDescriptors);
+        }
+
+        public IRecSelTypedResult RecSel_Typed(string filePath, IRecSelOptions? options)
+        {
+            try
+            {
+                _documentStore.LoadFromFile(filePath);
+                var document = _documentStore.GetDocument();
+                var recordType = options?.Type?.RecordType;
+
+                if (string.IsNullOrEmpty(recordType))
+                {
+                    if (document.RecordSets.Count == 0)
+                    {
+                        return RecSelTypedResult.Error(1, "No matching records.");
+                    }
+
+                    if (document.RecordSets.Count > 1)
+                    {
+                        return RecSelTypedResult.Error(2, "several record types found. Please use -t to specify one.");
+                    }
+
+                    return RecSelTypedResult.Success(document.RecordSets[0]);
+                }
+
+                var selectedRecordSet = SelectRecordSet(document, recordType, options);
+                if (selectedRecordSet is null)
+                {
+                    return RecSelTypedResult.Error(1, "No matching records.");
+                }
+
+                return RecSelTypedResult.Success(selectedRecordSet);
+            }
+            catch (FormatException ex)
+            {
+                return RecSelTypedResult.Error(3, ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return RecSelTypedResult.Error(4, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return RecSelTypedResult.Error(5, ex.Message);
+            }
         }
 
         public string RecInsType(string filePath, string recordType, string recordText)
@@ -67,6 +96,23 @@ namespace rec_file_lib.DirectFileServer
             var updatedRecordSet = _documentStore.DeleteRecords(recordType);
             _documentStore.SaveToFile(filePath);
             return _recSelFormatter.FormatRecordSet(updatedRecordSet);
+        }
+
+        private RecRecordSet? SelectRecordSet(RecFileDocument document, string recordType, IRecSelOptions? options)
+        {
+            var queryOptions = new RecSelectionQueryOptions(
+                ProjectedFields: ParseProjectedFields(options?.Project?.FieldNames),
+                SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
+                QuickFilter: ParseQuickFilter(options?.Select?.Quick),
+                Expression: ParseExpression(options?.Select?.Expression),
+                JoinField: ParseJoinField(options?.Select?.JoinField),
+                GroupByFields: ParseGroupByFields(options?.Group?.FieldNames),
+                Count: options?.Aggregate?.Count ?? false,
+                CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName),
+                SortFields: ParseSortFields(options?.Sort?.FieldNames),
+                Uniq: options?.Select?.Uniq ?? false);
+
+            return _selectionQueryEngine.Select(document, _documentStore.FindRecordSet(recordType), queryOptions);
         }
 
         private static IReadOnlySet<string>? ParseProjectedFields(string[]? fields)
