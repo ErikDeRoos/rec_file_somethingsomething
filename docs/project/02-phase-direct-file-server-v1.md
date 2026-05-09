@@ -9,6 +9,7 @@ Keep the API similar in intent to recutils operations, but COM-safe.
 ## Current implemented slice
 - `RecSel(filePath)`
 - `RecSelType(filePath, recordType)`
+- `RecInsType(filePath, recordType, recordText)`
 
 These methods currently return formatted text as a compatibility layer while the longer-term result direction remains structured cursor or reader-style access.
 
@@ -26,7 +27,7 @@ These methods currently return formatted text as a compatibility layer while the
 - Join records using foreign-key style fields
 
 ## Suggested public contract style
-- Tool-shaped operations such as `RecSel`
+- Tool-shaped operations such as `RecSel` and `RecInsType`
 - Compatibility text output where that helps mirror recutils behavior
 - Future cursor or reader-style access for richer result handling
 - Explicit operation methods rather than exposing internal object graphs
@@ -34,7 +35,8 @@ These methods currently return formatted text as a compatibility layer while the
 ## Example-driven note
 - `docs/examples/1_simple_singlefile/user.rec` validates the single-record-set path
 - `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` validates the meaningful difference between `RecSel` and `RecSelType`
-- Tests should validate direct operations against shared example data where practical
+- `docs/examples/2_simple_recutils_book_example/books.rec` and `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` now validate `RecInsType`
+- malformed examples under `docs/examples/3_wrong_...` through `7_wrong_...` help verify current insertion error handling
 
 ## Internal dependencies
 - `Model`

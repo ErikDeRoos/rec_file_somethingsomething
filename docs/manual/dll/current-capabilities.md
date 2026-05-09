@@ -15,6 +15,7 @@ This page tracks what the DLL supports today.
 - Stream-capable serializer
 - Round-trip coverage for valid examples
 - Parser coverage for malformed examples that distinguishes syntax problems from semantic-invalid data
+- Disposable working-copy test infrastructure for file-mutating tests
 
 ## Descriptor support currently implemented
 - `%rec`
@@ -24,9 +25,10 @@ This page tracks what the DLL supports today.
 - `%doc`
 
 ## Direct API status
-- `DirectFileServerV1` currently exposes tool-shaped `RecSel(filePath)` and `RecSelType(filePath, recordType)` methods
-- Current direct-selection output is formatted text intended as a recutils-style compatibility layer
+- `DirectFileServerV1` currently exposes tool-shaped `RecSel(filePath)`, `RecSelType(filePath, recordType)`, and `RecInsType(filePath, recordType, recordText)` methods
+- Current direct-selection and direct-insert output is formatted text intended as a recutils-style compatibility layer
 - `RecSelType` now has a meaningful behavioral difference in multi-record-type single-file examples
+- `RecInsType` performs typed insertion, persists the file, and validates the updated document before saving
 - The preferred longer-term direction is structured cursor or reader-style result access rather than raw text as the main contract
 
 ## Current example coverage
@@ -43,6 +45,6 @@ This page tracks what the DLL supports today.
 - `docs/examples/7_wrong_missing_field_separator/missing_colon.rec`
 
 ## Next capability target
-- Add validation logic for semantic-invalid examples
+- Expand validation logic beyond the currently covered subset
 - Evolve DirectFileServer result access toward structured cursor or reader-style patterns
 - Add the next small recutils-style direct operation only after the result-shape direction stays coherent

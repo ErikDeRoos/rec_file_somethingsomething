@@ -169,6 +169,138 @@ public sealed class DirectFileServerV1Tests
             NormalizeForComparison(output));
     }
 
+    [Fact]
+    public void RecInsType_SimpleRecutilsBookExample_AppendsBookRecordAndPersistsIt()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecInsType(
+            workingCopy.FilePath,
+            "Book",
+            """
+            Title: Smalltalk Best Practice Patterns
+            Author: Kent Beck
+            Location: home
+            """);
+
+        Assert.Contains("Title: Smalltalk Best Practice Patterns", output, StringComparison.Ordinal);
+        Assert.Contains("Author: Kent Beck", output, StringComparison.Ordinal);
+        Assert.Contains("Location: home", output, StringComparison.Ordinal);
+
+        var selected = server.RecSelType(workingCopy.FilePath, "Book");
+        Assert.Contains("Title: Smalltalk Best Practice Patterns", selected, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecInsType_MultipleRecordTypesSingleFile_AppendsOnlyTheRequestedRecordType()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecInsType(
+            workingCopy.FilePath,
+            "Residence",
+            """
+            Id: NewPlace
+            Address: 99 New Street, Test City
+            Telephone: 0000 111222
+            """);
+
+        Assert.Contains("Id: NewPlace", output, StringComparison.Ordinal);
+        Assert.Contains("Address: 99 New Street, Test City", output, StringComparison.Ordinal);
+
+        var residences = server.RecSelType(workingCopy.FilePath, "Residence");
+        var people = server.RecSelType(workingCopy.FilePath, "Person");
+
+        Assert.Contains("Id: NewPlace", residences, StringComparison.Ordinal);
+        Assert.DoesNotContain("Id: NewPlace", people, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecInsType_WrongMissingMandatoryField_ThrowsValidationError()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongMissingMandatoryField);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecInsType(
+            workingCopy.FilePath,
+            "User",
+            """
+            Name: Added user
+            Notes: Valid inserted record.
+            """));
+
+        Assert.Contains("missing mandatory field 'Name'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecInsType_WrongDuplicateKeyValue_ThrowsValidationError()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongDuplicateKeyValue);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecInsType(
+            workingCopy.FilePath,
+            "Item",
+            """
+            Id: 2
+            Title: Added item
+            """));
+
+        Assert.Contains("duplicate key value '1'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecInsType_WrongInvalidFieldType_ThrowsValidationError()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongInvalidFieldType);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecInsType(
+            workingCopy.FilePath,
+            "Task",
+            """
+            Title: Added task
+            Status: open
+            """));
+
+        Assert.Contains("invalid enum value 'pending'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecInsType_WrongBadMultilineContinuation_ThrowsDuringInitialLoad()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongBadMultilineContinuation);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() => server.RecInsType(
+            workingCopy.FilePath,
+            "Note",
+            """
+            Title: Added note
+            """));
+
+        Assert.Equal("Continuation line found without a current field.", exception.Message);
+    }
+
+    [Fact]
+    public void RecInsType_WrongMissingFieldSeparator_ThrowsDuringInitialLoad()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongMissingFieldSeparator);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() => server.RecInsType(
+            workingCopy.FilePath,
+            "Article",
+            """
+            Name: Added thing
+            Id: 1
+            """));
+
+        Assert.Equal("Invalid field line: %key Id", exception.Message);
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

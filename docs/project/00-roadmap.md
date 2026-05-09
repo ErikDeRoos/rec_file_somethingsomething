@@ -47,7 +47,7 @@
 - Stream-capable parser and serializer are implemented
 - Shared example scenario wrappers are in place for tests
 - Valid and malformed example sets are both part of the workflow
-- The first tool-shaped `DirectFileServerV1` API is in place with `RecSel` and `RecSelType`
+- The first tool-shaped `DirectFileServerV1` API is in place with `RecSel`, `RecSelType`, and `RecInsType`
 
 ## Current examples
 ### Valid examples
@@ -71,8 +71,9 @@
 - Parse malformed semantic examples for later validation
 - Fail early on malformed syntactical examples
 - Provide initial tool-shaped direct selection methods over the current foundation
+- Provide initial typed record insertion with validation-aware file updates
 
 ## Next likely deliverables
-- Introduce validation logic for semantic-invalid examples
+- Expand validation logic for semantic-invalid examples
 - Evolve DirectFileServer result access toward structured cursor or reader-style patterns
-- Expand example coverage as new behaviors are added
+- Add the next small recutils-style direct mutation or selection operation only after the result-shape direction stays coherent

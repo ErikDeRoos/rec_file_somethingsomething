@@ -11,6 +11,7 @@ namespace rec_file_lib.DirectFileServer
     {
         private readonly DirectFileServerDocumentStore _documentStore = new();
         private readonly DirectRecSelFormatter _recSelFormatter = new();
+        private readonly DirectRecMutationParser _mutationParser = new();
 
         public string RecSel(string filePath)
         {
@@ -24,6 +25,17 @@ namespace rec_file_lib.DirectFileServer
 
             _documentStore.LoadFromFile(filePath);
             return _recSelFormatter.FormatRecordSet(_documentStore.FindRecordSet(recordType));
+        }
+
+        public string RecInsType(string filePath, string recordType, string recordText)
+        {
+            ArgumentNullException.ThrowIfNull(recordType);
+
+            _documentStore.LoadFromFile(filePath);
+            var record = _mutationParser.ParseRecord(recordText);
+            var updatedRecordSet = _documentStore.InsertRecord(recordType, record);
+            _documentStore.SaveToFile(filePath);
+            return _recSelFormatter.FormatRecordSet(updatedRecordSet);
         }
     }
 }

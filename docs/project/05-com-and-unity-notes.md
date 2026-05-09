@@ -24,7 +24,7 @@ For complex outputs, prefer a long-term direction based on:
 - cursor or reader-style iteration
 - compatibility formatting layered on top when needed
 
-For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior.
+For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior for methods such as `RecSel`, `RecSelType`, and `RecInsType`.
 
 ## Registration and packaging
 - Keep the production output centered on the single `rec_file_lib` assembly
@@ -35,6 +35,7 @@ For now, plain text output can still be used as a temporary compatibility layer 
 ## Example-driven workflow
 - Shared example data lives under `docs/examples`
 - Tests should read realistic shared examples directly from `docs/examples`
+- Tests that mutate files should operate on disposable working copies instead of the canonical example files
 - Each example folder should include its own `README.md` explaining purpose and scope
 
 ## Versioning

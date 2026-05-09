@@ -10,5 +10,7 @@ namespace rec_file_lib
         string RecSel(string filePath);
 
         string RecSelType(string filePath, string recordType);
+
+        string RecInsType(string filePath, string recordType, string recordText);
     }
 }
