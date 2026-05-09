@@ -25,6 +25,8 @@ Project planning and phased delivery tracking.
   Phase plan for the SQL-like façade and session/metadata behavior.
 - `docs/project/05-com-and-unity-notes.md`  
   Notes about COM exposure, Unity integration, options-based contract shaping, result formats, documentation/manual placement, and versioning direction.
+- `docs/project/06-recsel-supported-behavior-matrix.md`  
+  Explicitly documented current RecSel supported subset, option interaction ordering, and golden behavior coverage.
 
 ### `docs/architecture/`
 Architecture notes and long-lived engineering guidance.

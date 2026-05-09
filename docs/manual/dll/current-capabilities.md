@@ -4,7 +4,7 @@ This page tracks what the DLL supports today.
 
 ## Current documented direction
 - Single production DLL
-- COM-visible entry points planned on top of a shared internal engine
+- COM-visible entry points over a shared internal engine
 - Example-driven implementation using files under `docs/examples`
 - Tests read shared examples directly
 
@@ -25,11 +25,29 @@ This page tracks what the DLL supports today.
 - `%doc`
 
 ## Direct API status
-- `DirectFileServerV1` currently exposes tool-shaped `RecSel(filePath)`, `RecSelType(filePath, recordType)`, and `RecInsType(filePath, recordType, recordText)` methods
-- Current direct-selection and direct-insert output is formatted text intended as a recutils-style compatibility layer
-- `RecSelType` now has a meaningful behavioral difference in multi-record-type single-file examples
-- `RecInsType` performs typed insertion, persists the file, and validates the updated document before saving
-- The preferred longer-term direction is structured cursor or reader-style result access rather than raw text as the main contract
+- `DirectFileServerV1` exposes:
+  - `RecSel(filePath, options)`
+  - `RecInsType(filePath, recordType, recordText)`
+  - `RecDelType(filePath, recordType)`
+- Current direct-selection output is formatted text used as a recutils-style compatibility layer
+- `RecSel` option support currently includes:
+  - type selection
+  - index selection
+  - quick substring filtering
+  - expression subset
+  - join
+  - projection
+  - grouping + count groundwork
+  - sorting
+  - uniq
+  - collapse
+  - include descriptors
+
+## Compatibility scope
+This project tracks recutils behavior incrementally.
+
+The currently supported subset and explicit operation ordering are documented in:
+- `docs/project/06-recsel-supported-behavior-matrix.md`
 
 ## Current example coverage
 ### Valid examples
@@ -45,6 +63,7 @@ This page tracks what the DLL supports today.
 - `docs/examples/7_wrong_missing_field_separator/missing_colon.rec`
 
 ## Next capability target
-- Expand validation logic beyond the currently covered subset
-- Evolve DirectFileServer result access toward structured cursor or reader-style patterns
-- Add the next small recutils-style direct operation only after the result-shape direction stays coherent
+- Add case-insensitive matching (`-i` style)
+- Continue tightening recutils-compatibility interactions
+- Extend aggregates beyond count groundwork
+- Evolve DirectFileServer result access toward structured cursor/reader-style patterns
