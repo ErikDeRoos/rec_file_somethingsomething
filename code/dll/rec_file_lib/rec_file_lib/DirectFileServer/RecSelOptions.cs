@@ -31,6 +31,8 @@ public class RecSelSelectOptions
     public string Indexes { get; set; } = string.Empty;
 
     public string Quick { get; set; } = string.Empty;
+
+    public string Expression { get; set; } = string.Empty;
 }
 
 [ComVisible(true)]

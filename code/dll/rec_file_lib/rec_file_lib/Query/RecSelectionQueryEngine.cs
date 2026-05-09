@@ -13,6 +13,7 @@ internal sealed class RecSelectionQueryEngine
             return null;
         }
 
+        var expression = RecSelectionExpressionParser.Parse(options.Expression);
         var selectedRecords = new List<RecRecord>();
 
         for (var recordIndex = 0; recordIndex < recordSet.Records.Count; recordIndex++)
@@ -24,6 +25,11 @@ internal sealed class RecSelectionQueryEngine
 
             var record = recordSet.Records[recordIndex];
             if (!MatchesQuickFilter(record, options.QuickFilter))
+            {
+                continue;
+            }
+
+            if (!MatchesExpression(record, expression))
             {
                 continue;
             }
@@ -47,6 +53,32 @@ internal sealed class RecSelectionQueryEngine
             {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private static bool MatchesExpression(RecRecord record, RecSelectionExpression? expression)
+    {
+        if (expression is null)
+        {
+            return true;
+        }
+
+        foreach (var field in record.Fields)
+        {
+            if (!string.Equals(field.Name, expression.FieldName, StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            return expression.Operator switch
+            {
+                RecSelectionExpressionOperator.Equals => string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
+                RecSelectionExpressionOperator.NotEquals => !string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
+                RecSelectionExpressionOperator.Contains => field.Value.Contains(expression.Value, StringComparison.Ordinal),
+                _ => false
+            };
         }
 
         return false;

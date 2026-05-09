@@ -708,6 +708,103 @@ public sealed class DirectFileServerV1Tests
         Assert.Equal(string.Empty, output);
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndExpressionEquals_ReturnsOnlyMatchingRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Expression = "Name = \"Mandy Nebel\"" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndExpressionContains_ReturnsOnlyMatchingRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Expression = "Email ~ \"example.com\"" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndExpressionNotEquals_ReturnsOnlyNonMatchingRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Expression = "Name != \"Mandy Nebel\"" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndInvalidExpression_ThrowsFormatException()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() =>
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Person" },
+                    Select = new RecSelSelectOptions { Expression = "Name ~~ Mandy" }
+                }));
+
+        Assert.Equal("Invalid selection expression: 'Name ~~ Mandy'.", exception.Message);
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

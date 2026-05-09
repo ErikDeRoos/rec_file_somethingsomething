@@ -28,7 +28,8 @@ namespace rec_file_lib.DirectFileServer
             var queryOptions = new RecSelectionQueryOptions(
                 ProjectedFields: ParseProjectedFields(options?.Project?.FieldNames),
                 SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
-                QuickFilter: ParseQuickFilter(options?.Select?.Quick));
+                QuickFilter: ParseQuickFilter(options?.Select?.Quick),
+                Expression: ParseExpression(options?.Select?.Expression));
 
             var selectedRecordSet = _selectionQueryEngine.Select(
                 _documentStore.FindRecordSet(recordType),
@@ -127,6 +128,16 @@ namespace rec_file_lib.DirectFileServer
             }
 
             return quick;
+        }
+
+        private static string? ParseExpression(string? expression)
+        {
+            if (string.IsNullOrWhiteSpace(expression))
+            {
+                return null;
+            }
+
+            return expression;
         }
     }
 }
