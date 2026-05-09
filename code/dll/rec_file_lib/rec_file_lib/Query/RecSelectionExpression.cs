@@ -25,6 +25,7 @@ internal enum RecSelectionBinaryOperator
 internal abstract record class RecSelectionExpression;
 
 internal sealed record class RecSelectionComparisonExpression(
+    int BindingId,
     string FieldName,
     RecSelectionExpressionOperator Operator,
     string Value) : RecSelectionExpression;

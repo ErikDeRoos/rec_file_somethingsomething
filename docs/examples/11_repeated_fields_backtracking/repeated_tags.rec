@@ -1,0 +1,13 @@
+# repeated fields valid example
+
+%rec: Entry
+
+Name: One
+Tag: red
+Tag: blue
+
+Name: Two
+Tag: green
+
+Name: Three
+Tag: amber

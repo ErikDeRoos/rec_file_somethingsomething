@@ -285,64 +285,157 @@ internal sealed class RecSelectionQueryEngine
             return true;
         }
 
-        return EvaluateExpression(record, expression);
+        var valuesByFieldName = BuildValuesByFieldName(record);
+        return EvaluateExpression(valuesByFieldName, expression, ExpressionBindingContext.Empty).Any();
     }
 
-    private static bool EvaluateExpression(RecRecord record, RecSelectionExpression expression)
+    private static IReadOnlyDictionary<string, IReadOnlyList<string>> BuildValuesByFieldName(RecRecord record)
+    {
+        var valuesByFieldName = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+        foreach (var field in record.Fields)
+        {
+            if (!valuesByFieldName.TryGetValue(field.Name, out var values))
+            {
+                values = [];
+                valuesByFieldName[field.Name] = values;
+            }
+
+            values.Add(field.Value);
+        }
+
+        return valuesByFieldName.ToDictionary(
+            pair => pair.Key,
+            pair => (IReadOnlyList<string>)pair.Value,
+            StringComparer.Ordinal);
+    }
+
+    private static IEnumerable<ExpressionBindingContext> EvaluateExpression(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionExpression expression,
+        ExpressionBindingContext context)
     {
         return expression switch
         {
-            RecSelectionComparisonExpression comparison => EvaluateComparison(record, comparison),
-            RecSelectionUnaryExpression unary => EvaluateUnary(record, unary),
-            RecSelectionBinaryExpression binary => EvaluateBinary(record, binary),
-            _ => false
+            RecSelectionComparisonExpression comparison => EvaluateComparison(valuesByFieldName, comparison, context),
+            RecSelectionUnaryExpression unary => EvaluateUnary(valuesByFieldName, unary, context),
+            RecSelectionBinaryExpression binary => EvaluateBinary(valuesByFieldName, binary, context),
+            _ => []
         };
     }
 
-    private static bool EvaluateUnary(RecRecord record, RecSelectionUnaryExpression expression)
+    private static IEnumerable<ExpressionBindingContext> EvaluateUnary(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionUnaryExpression expression,
+        ExpressionBindingContext context)
     {
         return expression.Operator switch
         {
-            RecSelectionUnaryOperator.Not => !EvaluateExpression(record, expression.Operand),
-            _ => false
+            RecSelectionUnaryOperator.Not => EvaluateExpression(valuesByFieldName, expression.Operand, context).Any()
+                ? []
+                : [context],
+            _ => []
         };
     }
 
-    private static bool EvaluateBinary(RecRecord record, RecSelectionBinaryExpression expression)
+    private static IEnumerable<ExpressionBindingContext> EvaluateBinary(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionBinaryExpression expression,
+        ExpressionBindingContext context)
     {
         return expression.Operator switch
         {
-            RecSelectionBinaryOperator.And => EvaluateExpression(record, expression.Left)
-                && EvaluateExpression(record, expression.Right),
-            RecSelectionBinaryOperator.Or => EvaluateExpression(record, expression.Left)
-                || EvaluateExpression(record, expression.Right),
-            _ => false
+            RecSelectionBinaryOperator.And => EvaluateAnd(valuesByFieldName, expression.Left, expression.Right, context),
+            RecSelectionBinaryOperator.Or => EvaluateOr(valuesByFieldName, expression.Left, expression.Right, context),
+            _ => []
         };
     }
 
-    private static bool EvaluateComparison(RecRecord record, RecSelectionComparisonExpression expression)
+    private static IEnumerable<ExpressionBindingContext> EvaluateAnd(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionExpression left,
+        RecSelectionExpression right,
+        ExpressionBindingContext context)
     {
-        foreach (var field in record.Fields)
+        foreach (var leftContext in EvaluateExpression(valuesByFieldName, left, context))
         {
-            if (!string.Equals(field.Name, expression.FieldName, StringComparison.Ordinal))
+            foreach (var rightContext in EvaluateExpression(valuesByFieldName, right, leftContext))
+            {
+                yield return rightContext;
+            }
+        }
+    }
+
+    private static IEnumerable<ExpressionBindingContext> EvaluateOr(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionExpression left,
+        RecSelectionExpression right,
+        ExpressionBindingContext context)
+    {
+        foreach (var leftContext in EvaluateExpression(valuesByFieldName, left, context))
+        {
+            yield return leftContext;
+        }
+
+        foreach (var rightContext in EvaluateExpression(valuesByFieldName, right, context))
+        {
+            yield return rightContext;
+        }
+    }
+
+    private static IEnumerable<ExpressionBindingContext> EvaluateComparison(
+        IReadOnlyDictionary<string, IReadOnlyList<string>> valuesByFieldName,
+        RecSelectionComparisonExpression expression,
+        ExpressionBindingContext context)
+    {
+        if (context.TryGetBinding(expression.BindingId, out var boundValue))
+        {
+            if (MatchesComparison(boundValue, expression.Operator, expression.Value))
+            {
+                yield return context;
+            }
+
+            yield break;
+        }
+
+        if (!valuesByFieldName.TryGetValue(expression.FieldName, out var candidateValues))
+        {
+            yield break;
+        }
+
+        foreach (var candidateValue in candidateValues)
+        {
+            if (!MatchesComparison(candidateValue, expression.Operator, expression.Value))
             {
                 continue;
             }
 
-            return expression.Operator switch
-            {
-                RecSelectionExpressionOperator.Equals => string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
-                RecSelectionExpressionOperator.NotEquals => !string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
-                RecSelectionExpressionOperator.Contains => field.Value.Contains(expression.Value, StringComparison.Ordinal),
-                RecSelectionExpressionOperator.LessThan => CompareValues(field.Value, expression.Value) < 0,
-                RecSelectionExpressionOperator.LessThanOrEqual => CompareValues(field.Value, expression.Value) <= 0,
-                RecSelectionExpressionOperator.GreaterThan => CompareValues(field.Value, expression.Value) > 0,
-                RecSelectionExpressionOperator.GreaterThanOrEqual => CompareValues(field.Value, expression.Value) >= 0,
-                _ => false
-            };
+            yield return context.Bind(expression.BindingId, candidateValue);
+        }
+    }
+
+    private sealed class ExpressionBindingContext
+    {
+        private readonly IReadOnlyDictionary<int, string> _boundValues;
+
+        private ExpressionBindingContext(IReadOnlyDictionary<int, string> boundValues)
+        {
+            _boundValues = boundValues;
         }
 
-        return false;
+        public static ExpressionBindingContext Empty { get; } = new(new Dictionary<int, string>());
+
+        public bool TryGetBinding(int bindingId, out string boundValue)
+        {
+            return _boundValues.TryGetValue(bindingId, out boundValue!);
+        }
+
+        public ExpressionBindingContext Bind(int bindingId, string value)
+        {
+            var updated = _boundValues.ToDictionary(pair => pair.Key, pair => pair.Value);
+            updated[bindingId] = value;
+            return new ExpressionBindingContext(updated);
+        }
     }
 
     private static int CompareValues(string left, string right)
@@ -449,5 +542,20 @@ internal sealed class RecSelectionQueryEngine
             .ToArray();
 
         return record with { Fields = fields };
+    }
+
+    private static bool MatchesComparison(string leftValue, RecSelectionExpressionOperator op, string rightValue)
+    {
+        return op switch
+        {
+            RecSelectionExpressionOperator.Equals => string.Equals(leftValue, rightValue, StringComparison.Ordinal),
+            RecSelectionExpressionOperator.NotEquals => !string.Equals(leftValue, rightValue, StringComparison.Ordinal),
+            RecSelectionExpressionOperator.Contains => leftValue.Contains(rightValue, StringComparison.Ordinal),
+            RecSelectionExpressionOperator.LessThan => CompareValues(leftValue, rightValue) < 0,
+            RecSelectionExpressionOperator.LessThanOrEqual => CompareValues(leftValue, rightValue) <= 0,
+            RecSelectionExpressionOperator.GreaterThan => CompareValues(leftValue, rightValue) > 0,
+            RecSelectionExpressionOperator.GreaterThanOrEqual => CompareValues(leftValue, rightValue) >= 0,
+            _ => false
+        };
     }
 }

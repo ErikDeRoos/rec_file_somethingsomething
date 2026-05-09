@@ -33,6 +33,12 @@ This example demonstrates:
 - decimal, negative, hexadecimal (`0x`) and octal (`0` prefix) integer literals
 - a validation-friendly fixture to support future numeric comparison expression slices
 
+### `docs/examples/11_repeated_fields_backtracking/repeated_tags.rec`
+This example demonstrates:
+- repeated field occurrences in a single record (`Tag` appears multiple times)
+- that repeated fields are valid and expected in rec-style records
+- a concrete fixture for backtracking-oriented selection expressions such as `Tag = "red" && Tag = "blue"`
+
 ## Intentionally invalid examples
 The documentation and tests also use intentionally invalid examples to show what goes wrong and why.
 

@@ -32,3 +32,5 @@ Shared examples in this directory are used for two purposes at the same time:
   - Valid example showing `int` field type values in decimal, negative, hexadecimal, and octal forms.
 - `docs/examples/10_wrong_invalid_int_field_type/`
   - Intentionally invalid example showing a value that violates a declared `int` field type.
+- `docs/examples/11_repeated_fields_backtracking/`
+  - Valid example showing repeated fields that are expected to participate in expression backtracking.

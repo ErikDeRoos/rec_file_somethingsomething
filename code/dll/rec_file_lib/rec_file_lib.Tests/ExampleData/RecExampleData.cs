@@ -12,6 +12,7 @@ internal enum RecExampleScenario
     MultipleRecordTypesSingleFile,
     IntFieldType,
     WrongInvalidIntFieldType,
+    RepeatedFieldsBacktracking,
 }
 
 internal static class RecExampleData
@@ -31,6 +32,7 @@ internal static class RecExampleData
             RecExampleScenario.MultipleRecordTypesSingleFile => Path.Combine("docs", "examples", "8_multiple_record_types_single_file", "people_and_residences.rec"),
             RecExampleScenario.IntFieldType => Path.Combine("docs", "examples", "9_int_field_type", "tasks.rec"),
             RecExampleScenario.WrongInvalidIntFieldType => Path.Combine("docs", "examples", "10_wrong_invalid_int_field_type", "invalid_priority.rec"),
+            RecExampleScenario.RepeatedFieldsBacktracking => Path.Combine("docs", "examples", "11_repeated_fields_backtracking", "repeated_tags.rec"),
             _ => throw new ArgumentOutOfRangeException(nameof(scenario), scenario, null),
         };
 

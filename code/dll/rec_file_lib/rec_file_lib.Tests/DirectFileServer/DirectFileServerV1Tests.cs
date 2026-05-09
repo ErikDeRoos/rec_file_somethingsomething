@@ -1397,4 +1397,55 @@ public sealed class DirectFileServerV1Tests
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');
     }
+
+    [Fact]
+    public void RecSel_WithRepeatedFieldAndExpressionBacktracking_MatchesUsingNonFirstOccurrence()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.RepeatedFieldsBacktracking);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Entry" },
+                Select = new RecSelSelectOptions { Expression = "Tag = \"red\" && Tag = \"blue\"" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: One
+                Tag: red
+                Tag: blue
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithRepeatedFieldAndExpressionOrBacktracking_MatchesEitherRepeatedValue()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.RepeatedFieldsBacktracking);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Entry" },
+                Select = new RecSelSelectOptions { Expression = "Tag = \"green\" || Tag = \"blue\"" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: One
+                Tag: red
+                Tag: blue
+
+                Name: Two
+                Tag: green
+                """),
+            NormalizeForComparison(output));
+    }
 }

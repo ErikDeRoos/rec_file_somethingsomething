@@ -17,10 +17,12 @@ internal static class RecSelectionExpressionParser
     {
         private readonly string _expression;
         private int _position;
+        private int _nextBindingId;
 
         public Parser(string expression)
         {
             _expression = expression;
+            _nextBindingId = 0;
         }
 
         public RecSelectionExpression ParseExpression()
@@ -178,7 +180,7 @@ internal static class RecSelectionExpressionParser
             var valueToken = ReadValueToken();
             var value = ParseValue(valueToken);
 
-            return new RecSelectionComparisonExpression(fieldName, op, value);
+            return new RecSelectionComparisonExpression(_nextBindingId++, fieldName, op, value);
         }
 
         private string ReadValueToken()

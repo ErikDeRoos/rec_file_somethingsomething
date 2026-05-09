@@ -173,4 +173,44 @@ public sealed class RecParserExampleTests
         Assert.Equal("0x10", recordSet.Records[2].Fields.Single(field => field.Name == "Priority").Value);
         Assert.Equal("020", recordSet.Records[3].Fields.Single(field => field.Name == "Priority").Value);
     }
+
+    [Fact]
+    public void Parse_RepeatedFieldsBacktracking_ReadsRepeatedTagFields()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.RepeatedFieldsBacktracking);
+
+        var document = parser.Parse(text);
+
+        var recordSet = Assert.Single(document.RecordSets);
+        Assert.Equal("Entry", recordSet.TypeName);
+        Assert.Equal(3, recordSet.Records.Count);
+
+        var firstRecordTags = recordSet.Records[0].Fields
+            .Where(field => field.Name == "Tag")
+            .Select(field => field.Value)
+            .ToArray();
+
+        Assert.Equal(new[] { "red", "blue" }, firstRecordTags);
+    }
+
+    [Fact]
+    public void Parse_RepeatedFieldsBacktracking_ReadsRepeatedTagFieldsAsValidData()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.RepeatedFieldsBacktracking);
+
+        var document = parser.Parse(text);
+
+        var recordSet = Assert.Single(document.RecordSets);
+        Assert.Equal("Entry", recordSet.TypeName);
+        Assert.Equal(3, recordSet.Records.Count);
+
+        var firstTags = recordSet.Records[0].Fields
+            .Where(field => field.Name == "Tag")
+            .Select(field => field.Value)
+            .ToArray();
+
+        Assert.Equal(new[] { "red", "blue" }, firstTags);
+    }
 }

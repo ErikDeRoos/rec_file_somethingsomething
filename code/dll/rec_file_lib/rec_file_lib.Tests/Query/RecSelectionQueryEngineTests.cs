@@ -609,6 +609,58 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("Ernest Wright", GetFieldValue(result.Records[1], "Name"));
     }
 
+    [Fact]
+    public void Select_WithRepeatedFieldAndExpressionBacktracking_MatchesUsingNonFirstOccurrence()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreateRepeatedFieldBacktrackingDocument();
+        var recordSet = document.RecordSets.Single();
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "Tag = \"red\" && Tag = \"blue\""));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal("One", GetFieldValue(result.Records[0], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithRepeatedFieldAndExpressionOrBacktracking_MatchesEitherRepeatedValue()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreateRepeatedFieldBacktrackingDocument();
+        var recordSet = document.RecordSets.Single();
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "Tag = \"green\" || Tag = \"blue\""));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("One", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Two", GetFieldValue(result.Records[1], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithRepeatedFieldAndComparisonUsesBoundValueAcrossAndClauses()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreateRepeatedFieldBacktrackingDocument();
+        var recordSet = document.RecordSets.Single();
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "Tag > \"b\" && Tag < \"c\""));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal("One", GetFieldValue(result.Records[0], "Name"));
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,
@@ -739,6 +791,35 @@ public sealed class RecSelectionQueryEngineTests
                 new RecRecord([
                     new RecField("Label", "Gamma"),
                     new RecField("Priority", "10")])
+            ]);
+
+        return new RecFileDocument([], [], [recordSet]);
+    }
+
+    private static RecFileDocument CreateRepeatedFieldBacktrackingDocument()
+    {
+        var descriptor = new RecDescriptor(
+            Fields: [],
+            KeyFieldName: null,
+            FieldTypes: new Dictionary<string, string>(StringComparer.Ordinal),
+            MandatoryFieldNames: [],
+            Documentation: null);
+
+        var recordSet = new RecRecordSet(
+            TypeName: "Entry",
+            Descriptor: descriptor,
+            Records:
+            [
+                new RecRecord([
+                    new RecField("Name", "One"),
+                    new RecField("Tag", "red"),
+                    new RecField("Tag", "blue")]),
+                new RecRecord([
+                    new RecField("Name", "Two"),
+                    new RecField("Tag", "green")]),
+                new RecRecord([
+                    new RecField("Name", "Three"),
+                    new RecField("Tag", "amber")])
             ]);
 
         return new RecFileDocument([], [], [recordSet]);

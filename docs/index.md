@@ -101,6 +101,10 @@ Shared example data used by documentation and tests.
   Explains the intentionally invalid int-type mismatch example and how to fix it.
 - `docs/examples/10_wrong_invalid_int_field_type/invalid_priority.rec`  
   Invalid example showing a non-integer value in an int-typed field.
+- `docs/examples/11_repeated_fields_backtracking/README.md`  
+  Explains the valid repeated-fields example and why backtracking-aware expression behavior is expected.
+- `docs/examples/11_repeated_fields_backtracking/repeated_tags.rec`  
+  Valid example showing repeated field occurrences in one record for backtracking-oriented query behavior.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.
