@@ -8,10 +8,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSel_SimpleSingleFile_ReturnsPackedRecutilsStyleOutput()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleSingleFile);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.SimpleSingleFile);
 
-        var output = server.RecSel(filePath);
+        var output = server.RecSel(workingCopy.FilePath);
 
         Assert.Equal(
             NormalizeForComparison(
@@ -34,10 +34,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSel_SimpleRecutilsBookExample_ReturnsPackedRecordOutputWithoutCommentsOrDescriptor()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.SimpleRecutilsBookExample);
 
-        var output = server.RecSel(filePath);
+        var output = server.RecSel(workingCopy.FilePath);
 
         Assert.Equal(
             NormalizeForComparison(
@@ -69,10 +69,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSel_MultipleRecordTypesSingleFile_ThrowsBecauseTypeMustBeSpecified()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.MultipleRecordTypesSingleFile);
 
-        var exception = Assert.Throws<InvalidOperationException>(() => server.RecSel(filePath));
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecSel(workingCopy.FilePath));
 
         Assert.Equal("several record types found. Please use -t to specify one.", exception.Message);
     }
@@ -80,10 +80,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSelType_SimpleRecutilsBookExample_WithBookType_ReturnsRecordOutput()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.SimpleRecutilsBookExample);
 
-        var output = server.RecSelType(filePath, "Book");
+        var output = server.RecSelType(workingCopy.FilePath, "Book");
 
         Assert.Equal(
             NormalizeForComparison(
@@ -115,10 +115,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSelType_SimpleRecutilsBookExample_WithUnknownType_ReturnsEmptyOutput()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.SimpleRecutilsBookExample);
 
-        var output = server.RecSelType(filePath, "Unknown");
+        var output = server.RecSelType(workingCopy.FilePath, "Unknown");
 
         Assert.Equal(string.Empty, output);
     }
@@ -126,10 +126,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSelType_MultipleRecordTypesSingleFile_WithPersonType_ReturnsOnlyPersonRecords()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.MultipleRecordTypesSingleFile);
 
-        var output = server.RecSelType(filePath, "Person");
+        var output = server.RecSelType(workingCopy.FilePath, "Person");
 
         Assert.Equal(
             NormalizeForComparison(
@@ -151,10 +151,10 @@ public sealed class DirectFileServerV1Tests
     [Fact]
     public void RecSelType_MultipleRecordTypesSingleFile_WithResidenceType_ReturnsOnlyResidenceRecords()
     {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
-        var filePath = RecExampleData.GetExampleFilePath(RecExampleScenario.MultipleRecordTypesSingleFile);
 
-        var output = server.RecSelType(filePath, "Residence");
+        var output = server.RecSelType(workingCopy.FilePath, "Residence");
 
         Assert.Equal(
             NormalizeForComparison(
