@@ -620,6 +620,94 @@ public sealed class DirectFileServerV1Tests
         Assert.Equal("Invalid record index range: '2-1'.", exception.Message);
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndQuick_MultipleRecordTypesSingleFile_ReturnsOnlyQuickMatchedRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Quick = "Chez" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeQuickAndProject_MultipleRecordTypesSingleFile_AppliesQuickThenProjection()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Quick = "example.com" },
+                Project = new RecSelProjectOptions { FieldNames = ["Name"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+
+                Name: Mandy Nebel
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeQuickAndIndexes_MultipleRecordTypesSingleFile_AppliesBothFilters()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Indexes = "1-2", Quick = "Chez" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndQuick_NoMatches_ReturnsEmptyOutput()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Quick = "does-not-exist" }
+            });
+
+        Assert.Equal(string.Empty, output);
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

@@ -25,11 +25,13 @@ namespace rec_file_lib.DirectFileServer
 
             var projectedFields = ParseProjectedFields(options?.Project?.FieldNames);
             var selectedIndexes = ParseSelectedIndexes(options?.Select?.Indexes);
+            var quickFilter = ParseQuickFilter(options?.Select?.Quick);
 
             return _recSelFormatter.FormatRecordSet(
                 _documentStore.FindRecordSet(recordType),
                 projectedFields,
-                selectedIndexes);
+                selectedIndexes,
+                quickFilter);
         }
 
         public string RecInsType(string filePath, string recordType, string recordText)
@@ -112,6 +114,16 @@ namespace rec_file_lib.DirectFileServer
             }
 
             return selectedIndexes.Count == 0 ? null : selectedIndexes;
+        }
+
+        private static string? ParseQuickFilter(string? quick)
+        {
+            if (string.IsNullOrWhiteSpace(quick))
+            {
+                return null;
+            }
+
+            return quick;
         }
     }
 }
