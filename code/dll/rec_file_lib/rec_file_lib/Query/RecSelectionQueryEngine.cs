@@ -334,11 +334,107 @@ internal sealed class RecSelectionQueryEngine
                 RecSelectionExpressionOperator.Equals => string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
                 RecSelectionExpressionOperator.NotEquals => !string.Equals(field.Value, expression.Value, StringComparison.Ordinal),
                 RecSelectionExpressionOperator.Contains => field.Value.Contains(expression.Value, StringComparison.Ordinal),
+                RecSelectionExpressionOperator.LessThan => CompareValues(field.Value, expression.Value) < 0,
+                RecSelectionExpressionOperator.LessThanOrEqual => CompareValues(field.Value, expression.Value) <= 0,
+                RecSelectionExpressionOperator.GreaterThan => CompareValues(field.Value, expression.Value) > 0,
+                RecSelectionExpressionOperator.GreaterThanOrEqual => CompareValues(field.Value, expression.Value) >= 0,
                 _ => false
             };
         }
 
         return false;
+    }
+
+    private static int CompareValues(string left, string right)
+    {
+        if (TryParseScalarNumber(left, out var leftNumber)
+            && TryParseScalarNumber(right, out var rightNumber))
+        {
+            return leftNumber.CompareTo(rightNumber);
+        }
+
+        return string.CompareOrdinal(left, right);
+    }
+
+    private static bool TryParseScalarNumber(string value, out decimal number)
+    {
+        number = 0;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var text = value.Trim();
+        var sign = 1m;
+
+        if (text[0] == '+' || text[0] == '-')
+        {
+            sign = text[0] == '-' ? -1m : 1m;
+            text = text[1..];
+            if (text.Length == 0)
+            {
+                return false;
+            }
+        }
+
+        if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        {
+            var digits = text[2..];
+            if (digits.Length == 0)
+            {
+                return false;
+            }
+
+            try
+            {
+                var parsed = Convert.ToInt64(digits, 16);
+                number = sign * parsed;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        if (text.Contains('.', StringComparison.Ordinal)
+            || text.Contains('e', StringComparison.OrdinalIgnoreCase))
+        {
+            if (!decimal.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var realValue))
+            {
+                return false;
+            }
+
+            number = sign * realValue;
+            return true;
+        }
+
+        if (text.Length > 1 && text[0] == '0')
+        {
+            if (text.Any(c => c is < '0' or > '7'))
+            {
+                return false;
+            }
+
+            try
+            {
+                var parsed = Convert.ToInt64(text, 8);
+                number = sign * parsed;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        if (!decimal.TryParse(text, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var integerValue))
+        {
+            return false;
+        }
+
+        number = sign * integerValue;
+        return true;
     }
 
     private static RecRecord ProjectRecord(RecRecord record, IReadOnlySet<string>? projectedFields)

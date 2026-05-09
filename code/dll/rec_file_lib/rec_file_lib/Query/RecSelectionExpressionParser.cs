@@ -110,7 +110,13 @@ internal static class RecSelectionExpressionParser
 
             while (!IsEnd)
             {
-                if (PeekStartsWith("!=") || PeekStartsWith("=") || PeekStartsWith("~"))
+                if (PeekStartsWith("!=")
+                    || PeekStartsWith("<=")
+                    || PeekStartsWith(">=")
+                    || PeekStartsWith("=")
+                    || PeekStartsWith("~")
+                    || PeekStartsWith("<")
+                    || PeekStartsWith(">"))
                 {
                     break;
                 }
@@ -139,6 +145,14 @@ internal static class RecSelectionExpressionParser
             {
                 op = RecSelectionExpressionOperator.NotEquals;
             }
+            else if (TryConsume("<="))
+            {
+                op = RecSelectionExpressionOperator.LessThanOrEqual;
+            }
+            else if (TryConsume(">="))
+            {
+                op = RecSelectionExpressionOperator.GreaterThanOrEqual;
+            }
             else if (TryConsume("="))
             {
                 op = RecSelectionExpressionOperator.Equals;
@@ -146,6 +160,14 @@ internal static class RecSelectionExpressionParser
             else if (TryConsume("~"))
             {
                 op = RecSelectionExpressionOperator.Contains;
+            }
+            else if (TryConsume("<"))
+            {
+                op = RecSelectionExpressionOperator.LessThan;
+            }
+            else if (TryConsume(">"))
+            {
+                op = RecSelectionExpressionOperator.GreaterThan;
             }
             else
             {

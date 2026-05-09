@@ -580,6 +580,35 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("Invalid selection expression: '(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\"'.", exception.Message);
     }
 
+    [Fact]
+    public void Select_WithExpressionStringGreaterThan_ReturnsOrdinallyMatchingRecords()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(document, recordSet, CreateOptions(Expression: "Name > \"Ernest Wright\""));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[0], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithExpressionStringLessThanOrEqual_ReturnsOrdinallyMatchingRecords()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(document, recordSet, CreateOptions(Expression: "Name <= \"Ernest Wright\""));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[1], "Name"));
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,
@@ -679,6 +708,37 @@ public sealed class RecSelectionQueryEngineTests
                     new RecField("Tag", "one"),
                     new RecField("Tag", "one"),
                     new RecField("Tag", "two")])
+            ]);
+
+        return new RecFileDocument([], [], [recordSet]);
+    }
+
+    private static RecFileDocument CreatePriorityDocument()
+    {
+        var descriptor = new RecDescriptor(
+            Fields: [],
+            KeyFieldName: null,
+            FieldTypes: new Dictionary<string, string>(StringComparer.Ordinal),
+            MandatoryFieldNames: [],
+            Documentation: null);
+
+        var recordSet = new RecRecordSet(
+            TypeName: "Task",
+            Descriptor: descriptor,
+            Records:
+            [
+                new RecRecord([
+                    new RecField("Label", "Alpha"),
+                    new RecField("Priority", "1")]),
+                new RecRecord([
+                    new RecField("Label", "Beta"),
+                    new RecField("Priority", "2")]),
+                new RecRecord([
+                    new RecField("Label", "Delta"),
+                    new RecField("Priority", "5")]),
+                new RecRecord([
+                    new RecField("Label", "Gamma"),
+                    new RecField("Priority", "10")])
             ]);
 
         return new RecFileDocument([], [], [recordSet]);

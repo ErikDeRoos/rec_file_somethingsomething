@@ -1344,7 +1344,7 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSel_WithTypeAndExpressionBooleanComposition_ReturnsMatchingRecords()
+    public void RecSel_WithTypeAndStringComparisonExpression_ReturnsOrdinallyMatchedRecords()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
@@ -1354,19 +1354,12 @@ public sealed class DirectFileServerV1Tests
             new RecSelOptions
             {
                 Type = new RecSelTypeOptions { RecordType = "Person" },
-                Select = new RecSelSelectOptions
-                {
-                    Expression = "Email ~ \"example.com\" && Abode = \"42AbbeterWay\""
-                }
+                Select = new RecSelSelectOptions { Expression = "Name > \"Ernest Wright\"" }
             });
 
         Assert.Equal(
             NormalizeForComparison(
                 """
-                Name: Alfred Nebel
-                Email: alf@example.com
-                Abode: 42AbbeterWay
-
                 Name: Mandy Nebel
                 Email: mandy@example.com
                 Abode: 42AbbeterWay
@@ -1375,50 +1368,29 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSel_WithTypeAndExpressionParentheses_AppliesGrouping()
+    public void RecSel_WithTypeAndScalarIntComparisonExpression_ReturnsNumericallyMatchedRecords()
     {
-        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.IntFieldType);
         var server = new DirectFileServerV1();
 
         var output = server.RecSel(
             workingCopy.FilePath,
             new RecSelOptions
             {
-                Type = new RecSelTypeOptions { RecordType = "Person" },
-                Select = new RecSelSelectOptions
-                {
-                    Expression = "(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\") && Abode = \"ChezGrampa\""
-                }
+                Type = new RecSelTypeOptions { RecordType = "Task" },
+                Select = new RecSelSelectOptions { Expression = "Priority >= 0x10" }
             });
 
         Assert.Equal(
             NormalizeForComparison(
                 """
-                Name: Ernest Wright
-                Abode: ChezGrampa
+                Title: Prepare release notes
+                Priority: 0x10
+
+                Title: Archive old snapshots
+                Priority: 020
                 """),
             NormalizeForComparison(output));
-    }
-
-    [Fact]
-    public void RecSel_WithTypeAndExpressionMissingClosingParenthesis_ThrowsFormatException()
-    {
-        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
-        var server = new DirectFileServerV1();
-
-        var exception = Assert.Throws<FormatException>(() =>
-            server.RecSel(
-                workingCopy.FilePath,
-                new RecSelOptions
-                {
-                    Type = new RecSelTypeOptions { RecordType = "Person" },
-                    Select = new RecSelSelectOptions
-                    {
-                        Expression = "(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\""
-                    }
-                }));
-
-        Assert.Equal("Invalid selection expression: '(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\"'.", exception.Message);
     }
 
     private static string NormalizeForComparison(string text)

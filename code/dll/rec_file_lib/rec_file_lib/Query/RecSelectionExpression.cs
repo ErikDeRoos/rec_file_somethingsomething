@@ -4,7 +4,11 @@ internal enum RecSelectionExpressionOperator
 {
     Equals,
     NotEquals,
-    Contains
+    Contains,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThan,
+    GreaterThanOrEqual
 }
 
 internal enum RecSelectionUnaryOperator
