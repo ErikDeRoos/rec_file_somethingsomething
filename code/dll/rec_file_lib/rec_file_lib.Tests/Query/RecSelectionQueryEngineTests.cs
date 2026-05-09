@@ -435,6 +435,70 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("two", result.Records[0].Fields[1].Value);
     }
 
+    [Fact]
+    public void Select_WithIndexesAndSort_AppliesSelectionBeforeSorting()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(
+                SelectedIndexes: new HashSet<int> { 0, 1 },
+                SortFields: ["Email"]));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[1], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithSortFieldNotProjected_StillSortsBeforeProjection()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(
+                SortFields: ["Email"],
+                ProjectedFields: new HashSet<string>(StringComparer.Ordinal) { "Name" }));
+
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Records.Count);
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[1], "Name"));
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[2], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithGroupByCountAndProjection_AppliesGroupingBeforeProjection()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(
+                GroupByFields: ["Abode"],
+                Count: true,
+                CountFieldName: "Total",
+                SortFields: ["Abode"],
+                ProjectedFields: new HashSet<string>(StringComparer.Ordinal) { "Total" }));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("2", GetFieldValue(result.Records[0], "Total"));
+        Assert.Equal("1", GetFieldValue(result.Records[1], "Total"));
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,
