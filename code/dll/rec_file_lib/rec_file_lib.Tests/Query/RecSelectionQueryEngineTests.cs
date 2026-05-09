@@ -394,6 +394,47 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("ChezGrampa", GetFieldValue(result.Records[1], "Abode"));
     }
 
+    [Fact]
+    public void Select_WithUniq_RemovesDuplicateFieldsByNameAndValuePerRecord()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreateDuplicateFieldDocument();
+        var recordSet = document.RecordSets.Single();
+
+        var result = engine.Select(document, recordSet, CreateOptions(Uniq: true));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal(3, result.Records[0].Fields.Count);
+        Assert.Equal("Name", result.Records[0].Fields[0].Name);
+        Assert.Equal("Erik", result.Records[0].Fields[0].Value);
+        Assert.Equal("Tag", result.Records[0].Fields[1].Name);
+        Assert.Equal("one", result.Records[0].Fields[1].Value);
+        Assert.Equal("Tag", result.Records[0].Fields[2].Name);
+        Assert.Equal("two", result.Records[0].Fields[2].Value);
+    }
+
+    [Fact]
+    public void Select_WithUniqAndProjection_DeduplicatesAfterProjection()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreateDuplicateFieldDocument();
+        var recordSet = document.RecordSets.Single();
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(
+                ProjectedFields: new HashSet<string>(StringComparer.Ordinal) { "Tag" },
+                Uniq: true));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal(2, result.Records[0].Fields.Count);
+        Assert.Equal("one", result.Records[0].Fields[0].Value);
+        Assert.Equal("two", result.Records[0].Fields[1].Value);
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,
@@ -403,7 +444,8 @@ public sealed class RecSelectionQueryEngineTests
         IReadOnlyList<string>? GroupByFields = null,
         bool Count = false,
         string CountFieldName = "Count",
-        IReadOnlyList<string>? SortFields = null)
+        IReadOnlyList<string>? SortFields = null,
+        bool Uniq = false)
     {
         return new RecSelectionQueryOptions(
             ProjectedFields,
@@ -414,7 +456,8 @@ public sealed class RecSelectionQueryEngineTests
             GroupByFields,
             Count,
             CountFieldName,
-            SortFields);
+            SortFields,
+            Uniq);
     }
 
     private static RecFileDocument CreatePeopleAndResidencesDocument()
@@ -469,6 +512,31 @@ public sealed class RecSelectionQueryEngineTests
             ]);
 
         return new RecFileDocument([], [], [personRecordSet, residenceRecordSet]);
+    }
+
+    private static RecFileDocument CreateDuplicateFieldDocument()
+    {
+        var descriptor = new RecDescriptor(
+            Fields: [],
+            KeyFieldName: null,
+            FieldTypes: new Dictionary<string, string>(StringComparer.Ordinal),
+            MandatoryFieldNames: [],
+            Documentation: null);
+
+        var recordSet = new RecRecordSet(
+            TypeName: "User",
+            Descriptor: descriptor,
+            Records:
+            [
+                new RecRecord([
+                    new RecField("Name", "Erik"),
+                    new RecField("Name", "Erik"),
+                    new RecField("Tag", "one"),
+                    new RecField("Tag", "one"),
+                    new RecField("Tag", "two")])
+            ]);
+
+        return new RecFileDocument([], [], [recordSet]);
     }
 
     private static string? GetFieldValue(RecRecord record, string fieldName)

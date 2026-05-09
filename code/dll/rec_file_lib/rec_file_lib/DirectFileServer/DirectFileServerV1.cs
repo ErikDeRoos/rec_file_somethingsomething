@@ -36,7 +36,8 @@ namespace rec_file_lib.DirectFileServer
                 GroupByFields: ParseGroupByFields(options?.Group?.FieldNames),
                 Count: options?.Aggregate?.Count ?? false,
                 CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName),
-                SortFields: ParseSortFields(options?.Sort?.FieldNames));
+                SortFields: ParseSortFields(options?.Sort?.FieldNames),
+                Uniq: options?.Select?.Uniq ?? false);
 
             var selectedRecordSet = _selectionQueryEngine.Select(
                 document,

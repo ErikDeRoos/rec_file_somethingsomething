@@ -11,4 +11,5 @@ internal sealed record class RecSelectionQueryOptions(
     IReadOnlyList<string>? GroupByFields,
     bool Count,
     string CountFieldName,
-    IReadOnlyList<string>? SortFields);
+    IReadOnlyList<string>? SortFields,
+    bool Uniq);

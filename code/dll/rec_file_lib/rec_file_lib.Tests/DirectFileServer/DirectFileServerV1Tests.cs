@@ -1095,6 +1095,54 @@ public sealed class DirectFileServerV1Tests
             NormalizeForComparison(output));
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndUniq_DoesNotRemoveNonDuplicateRepeatedFields()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" },
+                Select = new RecSelSelectOptions { Uniq = true }
+            });
+
+        Assert.Contains("Author: Nacho Gonzalez", output, StringComparison.Ordinal);
+        Assert.Contains("Author: Jose E. Marchesi", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecSel_WithJoinProjectionAndUniq_RemovesDuplicateJoinedFieldsPerRecord()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { JoinField = "Abode", Uniq = true },
+                Project = new RecSelProjectOptions { FieldNames = ["Residence.Address", "Residence.Address", "Name"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+
+                Name: Mandy Nebel
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+
+                Name: Ernest Wright
+                Residence.Address: 1 Wanter Rise, Greater Inncombe, BUCKS
+                """),
+            NormalizeForComparison(output));
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

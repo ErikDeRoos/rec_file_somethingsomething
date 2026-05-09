@@ -46,7 +46,11 @@ internal sealed class RecSelectionQueryEngine
             .Select(record => ProjectRecord(record, options.ProjectedFields))
             .ToArray();
 
-        return sourceRecordSet with { Records = projectedRecords };
+        var uniqRecords = options.Uniq
+            ? projectedRecords.Select(DeduplicateRecordFields).ToArray()
+            : projectedRecords;
+
+        return sourceRecordSet with { Records = uniqRecords };
     }
 
     private static IReadOnlyList<RecRecord> ApplyGroupingAndCount(
@@ -147,6 +151,28 @@ internal sealed class RecSelectionQueryEngine
         }
 
         return leftOriginalIndex.CompareTo(rightOriginalIndex);
+    }
+
+    private static RecRecord DeduplicateRecordFields(RecRecord record)
+    {
+        var uniqueFields = new List<RecField>(record.Fields.Count);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var field in record.Fields)
+        {
+            var key = $"{field.Name}\u001F{field.Value}";
+            if (seen.Add(key))
+            {
+                uniqueFields.Add(field);
+            }
+        }
+
+        if (uniqueFields.Count == record.Fields.Count)
+        {
+            return record;
+        }
+
+        return record with { Fields = uniqueFields.ToArray() };
     }
 
     private static RecRecordSet ApplyJoinIfRequested(RecFileDocument document, RecRecordSet sourceRecordSet, string? joinField)

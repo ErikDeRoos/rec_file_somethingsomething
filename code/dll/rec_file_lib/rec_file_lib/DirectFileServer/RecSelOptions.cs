@@ -43,6 +43,8 @@ public class RecSelSelectOptions
     public string JoinField { get; set; } = string.Empty;
 
     public bool Collapse { get; set; }
+
+    public bool Uniq { get; set; }
 }
 
 [ComVisible(true)]
