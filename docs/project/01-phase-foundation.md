@@ -57,6 +57,7 @@ Create the internal engine needed by both `DirectFileServerV1` and `SqlFileServe
 ## Example-driven milestone status
 - `docs/examples/1_simple_singlefile/user.rec` is covered by parser and serializer tests
 - `docs/examples/2_simple_recutils_book_example/books.rec` is covered by parser and serializer tests
+- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` is covered by parser and direct-selection tests
 - malformed examples under `docs/examples/3_wrong_...` through `7_wrong_...` now help define parser-versus-validator boundaries
 
 ## Non-goals for first cut

@@ -87,6 +87,10 @@ Shared example data used by documentation and tests.
   Explains the intentionally invalid missing-colon example and how to fix it.
 - `docs/examples/7_wrong_missing_field_separator/missing_colon.rec`  
   Invalid example showing a malformed field line without the `:` separator.
+- `docs/examples/8_multiple_record_types_single_file/README.md`  
+  Explains the valid multiple-record-types single-file example and why it matters.
+- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec`  
+  Valid example showing multiple typed record sets in a single rec file.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.

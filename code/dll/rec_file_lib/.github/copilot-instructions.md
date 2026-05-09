@@ -5,6 +5,7 @@
 - In this repository, the docs live at the repository root, not inside the Visual Studio DLL solution root. Use repo-root docs paths going forward.
 - Repository documentation should include a general `docs/index.md` file describing what each file is for, and the root `AGENTS.md` must reference that docs index.
 - User wants iterative delivery with every commit adding visible working code, a separate test project with small bite-sized unit tests validating decision paths, NuGet packaging and publishing from GitHub with GitHub-friendly markdown/documentation, and a separate .NET desktop editor project in the same repo with its own build/release visibility and documentation.
+- For future extensions beyond recutils compatibility, user wants improved file/folder structure support and native run-from-container support (for example zip), but this should not affect current compatibility-first implementation work.
 
 ## Documentation Structure
 - GitHub-ready DLL documentation should live under `docs/manual/dll`.

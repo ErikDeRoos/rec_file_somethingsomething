@@ -47,11 +47,13 @@
 - Stream-capable parser and serializer are implemented
 - Shared example scenario wrappers are in place for tests
 - Valid and malformed example sets are both part of the workflow
+- The first tool-shaped `DirectFileServerV1` API is in place with `RecSel` and `RecSelType`
 
 ## Current examples
 ### Valid examples
 - `docs/examples/1_simple_singlefile/user.rec`
 - `docs/examples/2_simple_recutils_book_example/books.rec`
+- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec`
 
 ### Intentionally invalid examples
 - `docs/examples/3_wrong_missing_mandatory_field/missing_name.rec`
@@ -68,8 +70,9 @@
 - Round-trip valid examples through parser and serializer
 - Parse malformed semantic examples for later validation
 - Fail early on malformed syntactical examples
+- Provide initial tool-shaped direct selection methods over the current foundation
 
 ## Next likely deliverables
 - Introduce validation logic for semantic-invalid examples
-- Start the first minimal `DirectFileServerV1` API over the current parser/serializer foundation
+- Evolve DirectFileServer result access toward structured cursor or reader-style patterns
 - Expand example coverage as new behaviors are added

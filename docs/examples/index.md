@@ -26,3 +26,5 @@ Shared examples in this directory are used for two purposes at the same time:
   - Intentionally invalid example showing a continuation line without a current field.
 - `docs/examples/7_wrong_missing_field_separator/`
   - Intentionally invalid example showing a malformed field line without the `:` separator.
+- `docs/examples/8_multiple_record_types_single_file/`
+  - Valid example showing multiple typed record sets in a single rec file.

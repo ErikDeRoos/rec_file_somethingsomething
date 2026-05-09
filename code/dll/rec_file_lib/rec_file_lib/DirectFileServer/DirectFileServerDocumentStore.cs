@@ -48,20 +48,25 @@ internal sealed class DirectFileServerDocumentStore
     {
         ArgumentNullException.ThrowIfNull(recordSetType);
 
-        if (recordSetType.Length == 0)
-        {
-            return _document.RecordSets
-                .FirstOrDefault(recordSet => string.IsNullOrEmpty(recordSet.TypeName))?
-                .Records.Count ?? 0;
-        }
-
-        return _document.RecordSets
-            .FirstOrDefault(recordSet => string.Equals(recordSet.TypeName, recordSetType, StringComparison.Ordinal))?
-            .Records.Count ?? 0;
+        return FindRecordSet(recordSetType)?.Records.Count ?? 0;
     }
 
     public RecFileDocument GetDocument()
     {
         return _document;
+    }
+
+    public RecRecordSet? FindRecordSet(string recordSetType)
+    {
+        ArgumentNullException.ThrowIfNull(recordSetType);
+
+        if (recordSetType.Length == 0)
+        {
+            return _document.RecordSets
+                .FirstOrDefault(recordSet => string.IsNullOrEmpty(recordSet.TypeName));
+        }
+
+        return _document.RecordSets
+            .FirstOrDefault(recordSet => string.Equals(recordSet.TypeName, recordSetType, StringComparison.Ordinal));
     }
 }

@@ -24,14 +24,16 @@ This page tracks what the DLL supports today.
 - `%doc`
 
 ## Direct API status
-- `DirectFileServerV1` now exposes an initial tool-shaped `RecSel(filePath)` method
-- Current `RecSel` output is formatted text intended as a recutils-style compatibility layer
+- `DirectFileServerV1` currently exposes tool-shaped `RecSel(filePath)` and `RecSelType(filePath, recordType)` methods
+- Current direct-selection output is formatted text intended as a recutils-style compatibility layer
+- `RecSelType` now has a meaningful behavioral difference in multi-record-type single-file examples
 - The preferred longer-term direction is structured cursor or reader-style result access rather than raw text as the main contract
 
 ## Current example coverage
 ### Valid examples
 - `docs/examples/1_simple_singlefile/user.rec`
 - `docs/examples/2_simple_recutils_book_example/books.rec`
+- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec`
 
 ### Intentionally invalid examples
 - `docs/examples/3_wrong_missing_mandatory_field/missing_name.rec`

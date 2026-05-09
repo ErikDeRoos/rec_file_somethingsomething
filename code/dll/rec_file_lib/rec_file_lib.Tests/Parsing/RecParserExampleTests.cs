@@ -109,4 +109,50 @@ public sealed class RecParserExampleTests
         Assert.Equal(new[] { "Nacho Gonzalez", "Jose E. Marchesi" }, authors);
         Assert.Equal("unknown", location.Value);
     }
+
+    [Fact]
+    public void Parse_MultipleRecordTypesSingleFile_ReadsTwoTypedRecordSets()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.MultipleRecordTypesSingleFile);
+
+        var document = parser.Parse(text);
+
+        Assert.Equal(new[] { "# multiple record types in a single file" }, document.CommentLines);
+        Assert.Equal(2, document.RecordSets.Count);
+        Assert.Equal("Person", document.RecordSets[0].TypeName);
+        Assert.Equal("Residence", document.RecordSets[1].TypeName);
+    }
+
+    [Fact]
+    public void Parse_MultipleRecordTypesSingleFile_ReadsDescriptorAndForeignKeyStyleFieldType()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.MultipleRecordTypesSingleFile);
+
+        var document = parser.Parse(text);
+
+        var personRecordSet = document.RecordSets[0];
+        var residenceRecordSet = document.RecordSets[1];
+
+        Assert.Equal("rec Residence", personRecordSet.Descriptor.FieldTypes["Abode"]);
+        Assert.Equal("Id", residenceRecordSet.Descriptor.KeyFieldName);
+    }
+
+    [Fact]
+    public void Parse_MultipleRecordTypesSingleFile_ReadsRecordsAcrossBothRecordSets()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.MultipleRecordTypesSingleFile);
+
+        var document = parser.Parse(text);
+
+        var personRecordSet = document.RecordSets[0];
+        var residenceRecordSet = document.RecordSets[1];
+
+        Assert.Equal(3, personRecordSet.Records.Count);
+        Assert.Equal(2, residenceRecordSet.Records.Count);
+        Assert.Equal("42AbbeterWay", personRecordSet.Records[0].Fields.Single(field => field.Name == "Abode").Value);
+        Assert.Equal("ChezGrampa", residenceRecordSet.Records[1].Fields.Single(field => field.Name == "Id").Value);
+    }
 }

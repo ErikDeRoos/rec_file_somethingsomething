@@ -8,5 +8,7 @@ namespace rec_file_lib
     public interface IDirectFileServer
     {
         string RecSel(string filePath);
+
+        string RecSelType(string filePath, string recordType);
     }
 }

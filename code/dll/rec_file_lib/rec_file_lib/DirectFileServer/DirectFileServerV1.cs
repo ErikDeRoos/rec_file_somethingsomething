@@ -17,5 +17,13 @@ namespace rec_file_lib.DirectFileServer
             _documentStore.LoadFromFile(filePath);
             return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
         }
+
+        public string RecSelType(string filePath, string recordType)
+        {
+            ArgumentNullException.ThrowIfNull(recordType);
+
+            _documentStore.LoadFromFile(filePath);
+            return _recSelFormatter.FormatRecordSet(_documentStore.FindRecordSet(recordType));
+        }
     }
 }

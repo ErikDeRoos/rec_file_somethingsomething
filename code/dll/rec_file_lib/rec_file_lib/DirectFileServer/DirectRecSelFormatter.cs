@@ -19,8 +19,18 @@ internal sealed class DirectRecSelFormatter
             throw new InvalidOperationException("several record types found. Please use -t to specify one.");
         }
 
+        return FormatRecordSet(document.RecordSets[0]);
+    }
+
+    public string FormatRecordSet(RecRecordSet? recordSet)
+    {
+        if (recordSet is null)
+        {
+            return string.Empty;
+        }
+
         using var writer = new StringWriter();
-        WriteRecordSetRecords(writer, document.RecordSets[0]);
+        WriteRecordSetRecords(writer, recordSet);
         return writer.ToString().TrimEnd('\r', '\n');
     }
 

@@ -9,6 +9,7 @@ internal enum RecExampleScenario
     WrongInvalidFieldType,
     WrongBadMultilineContinuation,
     WrongMissingFieldSeparator,
+    MultipleRecordTypesSingleFile,
 }
 
 internal static class RecExampleData
@@ -25,6 +26,7 @@ internal static class RecExampleData
             RecExampleScenario.WrongInvalidFieldType => Path.Combine("docs", "examples", "5_wrong_invalid_field_type", "invalid_status.rec"),
             RecExampleScenario.WrongBadMultilineContinuation => Path.Combine("docs", "examples", "6_wrong_bad_multiline_continuation", "orphan_continuation.rec"),
             RecExampleScenario.WrongMissingFieldSeparator => Path.Combine("docs", "examples", "7_wrong_missing_field_separator", "missing_colon.rec"),
+            RecExampleScenario.MultipleRecordTypesSingleFile => Path.Combine("docs", "examples", "8_multiple_record_types_single_file", "people_and_residences.rec"),
             _ => throw new ArgumentOutOfRangeException(nameof(scenario), scenario, null),
         };
 

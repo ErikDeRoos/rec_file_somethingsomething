@@ -18,6 +18,13 @@ This recutils-inspired example demonstrates:
 - repeated fields such as multiple `Author` entries
 - several records in a single file
 
+### `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec`
+This example demonstrates:
+- multiple `%rec:` blocks in one file
+- a `Person` record set and a `Residence` record set in the same document
+- a simple foreign-key style relationship using `%type: Abode rec Residence`
+- a concrete case where `RecSel(filePath)` and `RecSelType(filePath, recordType)` behave differently
+
 ## Intentionally invalid examples
 The documentation and tests also use intentionally invalid examples to show what goes wrong and why.
 
