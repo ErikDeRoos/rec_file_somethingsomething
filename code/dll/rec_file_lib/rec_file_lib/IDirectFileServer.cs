@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using rec_file_lib.DirectFileServer;
 
 namespace rec_file_lib
 {
@@ -7,11 +8,7 @@ namespace rec_file_lib
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IDirectFileServer
     {
-        string RecSel(string filePath);
-
-        string RecSelType(string filePath, string recordType);
-
-        string RecSelTypeSelect(string filePath, string recordType, string indexes, string fields);
+        string RecSel(string filePath, RecSelOptions options);
 
         string RecInsType(string filePath, string recordType, string recordText);
 

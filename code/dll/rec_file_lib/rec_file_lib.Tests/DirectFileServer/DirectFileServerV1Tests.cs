@@ -11,7 +11,7 @@ public sealed class DirectFileServerV1Tests
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSel(workingCopy.FilePath);
+        var output = server.RecSel(workingCopy.FilePath, options: null);
 
         Assert.Equal(
             NormalizeForComparison(
@@ -37,7 +37,7 @@ public sealed class DirectFileServerV1Tests
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSel(workingCopy.FilePath);
+        var output = server.RecSel(workingCopy.FilePath, options: null);
 
         Assert.Equal(
             NormalizeForComparison(
@@ -72,18 +72,23 @@ public sealed class DirectFileServerV1Tests
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var exception = Assert.Throws<InvalidOperationException>(() => server.RecSel(workingCopy.FilePath));
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecSel(workingCopy.FilePath, options: null));
 
         Assert.Equal("several record types found. Please use -t to specify one.", exception.Message);
     }
 
     [Fact]
-    public void RecSelType_SimpleRecutilsBookExample_WithBookType_ReturnsRecordOutput()
+    public void RecSel_WithType_SimpleRecutilsBookExample_WithBookType_ReturnsRecordOutput()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelType(workingCopy.FilePath, "Book");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -113,23 +118,33 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelType_SimpleRecutilsBookExample_WithUnknownType_ReturnsEmptyOutput()
+    public void RecSel_WithType_SimpleRecutilsBookExample_WithUnknownType_ReturnsEmptyOutput()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelType(workingCopy.FilePath, "Unknown");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Unknown" }
+            });
 
         Assert.Equal(string.Empty, output);
     }
 
     [Fact]
-    public void RecSelType_MultipleRecordTypesSingleFile_WithPersonType_ReturnsOnlyPersonRecords()
+    public void RecSel_WithType_MultipleRecordTypesSingleFile_WithPersonType_ReturnsOnlyPersonRecords()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelType(workingCopy.FilePath, "Person");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -149,12 +164,17 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelType_MultipleRecordTypesSingleFile_WithResidenceType_ReturnsOnlyResidenceRecords()
+    public void RecSel_WithType_MultipleRecordTypesSingleFile_WithResidenceType_ReturnsOnlyResidenceRecords()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelType(workingCopy.FilePath, "Residence");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Residence" }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -188,7 +208,12 @@ public sealed class DirectFileServerV1Tests
         Assert.Contains("Author: Kent Beck", output, StringComparison.Ordinal);
         Assert.Contains("Location: home", output, StringComparison.Ordinal);
 
-        var selected = server.RecSelType(workingCopy.FilePath, "Book");
+        var selected = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" }
+            });
         Assert.Contains("Title: Smalltalk Best Practice Patterns", selected, StringComparison.Ordinal);
     }
 
@@ -208,7 +233,12 @@ public sealed class DirectFileServerV1Tests
             """);
 
         var reloadedServer = new DirectFileServerV1();
-        var output = reloadedServer.RecSelType(workingCopy.FilePath, "Book");
+        var output = reloadedServer.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" }
+            });
 
         Assert.Contains("Title: Domain-Driven Design", output, StringComparison.Ordinal);
         Assert.Contains("Author: Eric Evans", output, StringComparison.Ordinal);
@@ -232,8 +262,18 @@ public sealed class DirectFileServerV1Tests
         Assert.Contains("Id: NewPlace", output, StringComparison.Ordinal);
         Assert.Contains("Address: 99 New Street, Test City", output, StringComparison.Ordinal);
 
-        var residences = server.RecSelType(workingCopy.FilePath, "Residence");
-        var people = server.RecSelType(workingCopy.FilePath, "Person");
+        var residences = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Residence" }
+            });
+        var people = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" }
+            });
 
         Assert.Contains("Id: NewPlace", residences, StringComparison.Ordinal);
         Assert.DoesNotContain("Id: NewPlace", people, StringComparison.Ordinal);
@@ -248,7 +288,14 @@ public sealed class DirectFileServerV1Tests
         var output = server.RecDelType(workingCopy.FilePath, "Book");
 
         Assert.Equal(string.Empty, output);
-        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Book"));
+        Assert.Equal(
+            string.Empty,
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Book" }
+                }));
         var fileContents = File.ReadAllText(workingCopy.FilePath);
         Assert.Contains("%rec: Book", fileContents, StringComparison.Ordinal);
     }
@@ -262,7 +309,12 @@ public sealed class DirectFileServerV1Tests
         deletingServer.RecDelType(workingCopy.FilePath, "Book");
 
         var reloadedServer = new DirectFileServerV1();
-        var output = reloadedServer.RecSelType(workingCopy.FilePath, "Book");
+        var output = reloadedServer.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" }
+            });
 
         Assert.Equal(string.Empty, output);
         var fileContents = File.ReadAllText(workingCopy.FilePath);
@@ -278,8 +330,20 @@ public sealed class DirectFileServerV1Tests
         var output = server.RecDelType(workingCopy.FilePath, "Person");
 
         Assert.Equal(string.Empty, output);
-        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Person"));
-        var residences = server.RecSelType(workingCopy.FilePath, "Residence");
+        Assert.Equal(
+            string.Empty,
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Person" }
+                }));
+        var residences = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Residence" }
+            });
         Assert.Contains("Id: 42AbbeterWay", residences, StringComparison.Ordinal);
     }
 
@@ -303,7 +367,14 @@ public sealed class DirectFileServerV1Tests
         var output = server.RecDelType(workingCopy.FilePath, "User");
 
         Assert.Equal(string.Empty, output);
-        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "User"));
+        Assert.Equal(
+            string.Empty,
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "User" }
+                }));
     }
 
     [Fact]
@@ -315,7 +386,14 @@ public sealed class DirectFileServerV1Tests
         var output = server.RecDelType(workingCopy.FilePath, "Item");
 
         Assert.Equal(string.Empty, output);
-        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Item"));
+        Assert.Equal(
+            string.Empty,
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Item" }
+                }));
     }
 
     [Fact]
@@ -327,7 +405,14 @@ public sealed class DirectFileServerV1Tests
         var output = server.RecDelType(workingCopy.FilePath, "Task");
 
         Assert.Equal(string.Empty, output);
-        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Task"));
+        Assert.Equal(
+            string.Empty,
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Task" }
+                }));
     }
 
     [Fact]
@@ -437,12 +522,18 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithIndexes_ReturnsOnlyRequestedRecords()
+    public void RecSel_WithTypeAndSelect_MultipleRecordTypesSingleFile_WithIndexes_ReturnsOnlyRequestedRecords()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", "1-2", null);
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Indexes = "1-2" }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -458,12 +549,18 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithProjection_ReturnsOnlyProjectedFields()
+    public void RecSel_WithTypeAndProject_MultipleRecordTypesSingleFile_WithProjection_ReturnsOnlyProjectedFields()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", null, "Name,Email");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Project = new RecSelProjectOptions { FieldNames = ["Name", "Email"] }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -480,12 +577,19 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithIndexesAndProjection_AppliesBoth()
+    public void RecSel_WithTypeSelectAndProject_MultipleRecordTypesSingleFile_AppliesBoth()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
-        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", "0,2", "Name");
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Indexes = "0,2" },
+                Project = new RecSelProjectOptions { FieldNames = ["Name"] }
+            });
 
         Assert.Equal(
             NormalizeForComparison(
@@ -498,13 +602,20 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
-    public void RecSelTypeSelect_WithInvalidIndexRange_ThrowsFormatException()
+    public void RecSel_WithInvalidIndexRange_ThrowsFormatException()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
         var server = new DirectFileServerV1();
 
         var exception = Assert.Throws<FormatException>(() =>
-            server.RecSelTypeSelect(workingCopy.FilePath, "Person", "2-1", "Name"));
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Person" },
+                    Select = new RecSelSelectOptions { Indexes = "2-1" },
+                    Project = new RecSelProjectOptions { FieldNames = ["Name"] }
+                }));
 
         Assert.Equal("Invalid record index range: '2-1'.", exception.Message);
     }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace rec_file_lib.DirectFileServer
@@ -13,28 +13,18 @@ namespace rec_file_lib.DirectFileServer
         private readonly DirectRecSelFormatter _recSelFormatter = new();
         private readonly DirectRecMutationParser _mutationParser = new();
 
-        public string RecSel(string filePath)
+        public string RecSel(string filePath, RecSelOptions? options)
         {
             _documentStore.LoadFromFile(filePath);
-            return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
-        }
 
-        public string RecSelType(string filePath, string recordType)
-        {
-            ArgumentNullException.ThrowIfNull(recordType);
+            var recordType = options?.Type?.RecordType;
+            if (string.IsNullOrEmpty(recordType))
+            {
+                return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
+            }
 
-            _documentStore.LoadFromFile(filePath);
-            return _recSelFormatter.FormatRecordSet(_documentStore.FindRecordSet(recordType));
-        }
-
-        public string RecSelTypeSelect(string filePath, string recordType, string? indexes, string? fields)
-        {
-            ArgumentNullException.ThrowIfNull(recordType);
-
-            _documentStore.LoadFromFile(filePath);
-
-            var projectedFields = ParseProjectedFields(fields);
-            var selectedIndexes = ParseSelectedIndexes(indexes);
+            var projectedFields = ParseProjectedFields(options?.Project?.FieldNames);
+            var selectedIndexes = ParseSelectedIndexes(options?.Select?.Indexes);
 
             return _recSelFormatter.FormatRecordSet(
                 _documentStore.FindRecordSet(recordType),
@@ -63,19 +53,17 @@ namespace rec_file_lib.DirectFileServer
             return _recSelFormatter.FormatRecordSet(updatedRecordSet);
         }
 
-        private static IReadOnlySet<string>? ParseProjectedFields(string? fields)
+        private static IReadOnlySet<string>? ParseProjectedFields(string[]? fields)
         {
-            if (string.IsNullOrWhiteSpace(fields))
+            if (fields is null || fields.Length == 0)
             {
                 return null;
             }
 
-            var projectedFields = new HashSet<string>(StringComparer.Ordinal);
-            var names = fields.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            foreach (var name in names)
-            {
-                projectedFields.Add(name);
-            }
+            var projectedFields = fields
+                .Where(static name => !string.IsNullOrWhiteSpace(name))
+                .Select(static name => name.Trim())
+                .ToHashSet(StringComparer.Ordinal);
 
             return projectedFields.Count == 0 ? null : projectedFields;
         }
