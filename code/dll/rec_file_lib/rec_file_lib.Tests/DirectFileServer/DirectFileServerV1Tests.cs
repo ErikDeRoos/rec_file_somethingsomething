@@ -805,6 +805,93 @@ public sealed class DirectFileServerV1Tests
         Assert.Equal("Invalid selection expression: 'Name ~~ Mandy'.", exception.Message);
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndJoinField_PerformsInnerJoinAndIncludesJoinedFields()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { JoinField = "Abode" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+                Residence.Id: 42AbbeterWay
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+                Residence.Telephone: 01234 5676789
+
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                Residence.Id: 42AbbeterWay
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+                Residence.Telephone: 01234 5676789
+
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                Residence.Id: ChezGrampa
+                Residence.Address: 1 Wanter Rise, Greater Inncombe, BUCKS
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeJoinFieldAndProjection_CanProjectJoinedFields()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { JoinField = "Abode" },
+                Project = new RecSelProjectOptions { FieldNames = ["Name", "Residence.Address"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+
+                Name: Mandy Nebel
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+
+                Name: Ernest Wright
+                Residence.Address: 1 Wanter Rise, Greater Inncombe, BUCKS
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithJoinFieldNotDeclaredAsRecType_ThrowsInvalidOperationException()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            server.RecSel(
+                workingCopy.FilePath,
+                new RecSelOptions
+                {
+                    Type = new RecSelTypeOptions { RecordType = "Person" },
+                    Select = new RecSelSelectOptions { JoinField = "Name" }
+                }));
+
+        Assert.Equal("join field 'Name' is not declared with a rec type.", exception.Message);
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

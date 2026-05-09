@@ -33,6 +33,8 @@ public class RecSelSelectOptions
     public string Quick { get; set; } = string.Empty;
 
     public string Expression { get; set; } = string.Empty;
+
+    public string JoinField { get; set; } = string.Empty;
 }
 
 [ComVisible(true)]

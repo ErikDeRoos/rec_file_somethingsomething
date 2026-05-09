@@ -4,8 +4,9 @@ namespace rec_file_lib.Query;
 
 internal sealed class RecSelectionQueryEngine
 {
-    public RecRecordSet? Select(RecRecordSet? recordSet, RecSelectionQueryOptions options)
+    public RecRecordSet? Select(RecFileDocument document, RecRecordSet? recordSet, RecSelectionQueryOptions options)
     {
+        ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(options);
 
         if (recordSet is null)
@@ -14,16 +15,17 @@ internal sealed class RecSelectionQueryEngine
         }
 
         var expression = RecSelectionExpressionParser.Parse(options.Expression);
+        var sourceRecordSet = ApplyJoinIfRequested(document, recordSet, options.JoinField);
         var selectedRecords = new List<RecRecord>();
 
-        for (var recordIndex = 0; recordIndex < recordSet.Records.Count; recordIndex++)
+        for (var recordIndex = 0; recordIndex < sourceRecordSet.Records.Count; recordIndex++)
         {
             if (options.SelectedIndexes is not null && !options.SelectedIndexes.Contains(recordIndex))
             {
                 continue;
             }
 
-            var record = recordSet.Records[recordIndex];
+            var record = sourceRecordSet.Records[recordIndex];
             if (!MatchesQuickFilter(record, options.QuickFilter))
             {
                 continue;
@@ -37,7 +39,92 @@ internal sealed class RecSelectionQueryEngine
             selectedRecords.Add(ProjectRecord(record, options.ProjectedFields));
         }
 
-        return recordSet with { Records = selectedRecords.ToArray() };
+        return sourceRecordSet with { Records = selectedRecords.ToArray() };
+    }
+
+    private static RecRecordSet ApplyJoinIfRequested(RecFileDocument document, RecRecordSet sourceRecordSet, string? joinField)
+    {
+        if (string.IsNullOrEmpty(joinField))
+        {
+            return sourceRecordSet;
+        }
+
+        if (!sourceRecordSet.Descriptor.FieldTypes.TryGetValue(joinField, out var fieldTypeDeclaration)
+            || string.IsNullOrWhiteSpace(fieldTypeDeclaration))
+        {
+            throw new InvalidOperationException($"join field '{joinField}' is not declared with a rec type.");
+        }
+
+        var declaration = fieldTypeDeclaration.Trim();
+        const string recPrefix = "rec ";
+        if (!declaration.StartsWith(recPrefix, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"join field '{joinField}' is not declared with a rec type.");
+        }
+
+        var targetType = declaration[recPrefix.Length..].Trim();
+        if (targetType.Length == 0)
+        {
+            throw new InvalidOperationException($"join field '{joinField}' is not declared with a rec type.");
+        }
+
+        var targetRecordSet = document.RecordSets
+            .FirstOrDefault(set => string.Equals(set.TypeName, targetType, StringComparison.Ordinal));
+
+        if (targetRecordSet is null)
+        {
+            throw new InvalidOperationException($"join target record set '{targetType}' not found.");
+        }
+
+        var targetKeyFieldName = targetRecordSet.Descriptor.KeyFieldName;
+        if (string.IsNullOrEmpty(targetKeyFieldName))
+        {
+            throw new InvalidOperationException($"join target record set '{targetType}' does not declare a key field.");
+        }
+
+        var targetByKey = targetRecordSet.Records
+            .Select(record => new { Record = record, Key = TryGetFieldValue(record, targetKeyFieldName) })
+            .Where(item => !string.IsNullOrEmpty(item.Key))
+            .ToDictionary(item => item.Key!, item => item.Record, StringComparer.Ordinal);
+
+        var joinedRecords = new List<RecRecord>();
+        foreach (var sourceRecord in sourceRecordSet.Records)
+        {
+            var foreignKeyValue = TryGetFieldValue(sourceRecord, joinField);
+            if (string.IsNullOrEmpty(foreignKeyValue))
+            {
+                continue;
+            }
+
+            if (!targetByKey.TryGetValue(foreignKeyValue, out var targetRecord))
+            {
+                continue;
+            }
+
+            joinedRecords.Add(JoinRecords(sourceRecord, targetType, targetRecord));
+        }
+
+        return sourceRecordSet with { Records = joinedRecords.ToArray() };
+    }
+
+    private static string? TryGetFieldValue(RecRecord record, string fieldName)
+    {
+        return record.Fields
+            .FirstOrDefault(field => string.Equals(field.Name, fieldName, StringComparison.Ordinal))
+            ?.Value;
+    }
+
+    private static RecRecord JoinRecords(RecRecord sourceRecord, string targetType, RecRecord targetRecord)
+    {
+        var joinedFields = new List<RecField>(sourceRecord.Fields.Count + targetRecord.Fields.Count);
+        joinedFields.AddRange(sourceRecord.Fields);
+
+        foreach (var targetField in targetRecord.Fields)
+        {
+            joinedFields.Add(new RecField($"{targetType}.{targetField.Name}", targetField.Value));
+        }
+
+        return sourceRecord with { Fields = joinedFields.ToArray() };
     }
 
     private static bool MatchesQuickFilter(RecRecord record, string? quickFilter)

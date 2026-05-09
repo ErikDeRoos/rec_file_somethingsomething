@@ -25,13 +25,16 @@ namespace rec_file_lib.DirectFileServer
                 return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
             }
 
+            var document = _documentStore.GetDocument();
             var queryOptions = new RecSelectionQueryOptions(
                 ProjectedFields: ParseProjectedFields(options?.Project?.FieldNames),
                 SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
                 QuickFilter: ParseQuickFilter(options?.Select?.Quick),
-                Expression: ParseExpression(options?.Select?.Expression));
+                Expression: ParseExpression(options?.Select?.Expression),
+                JoinField: ParseJoinField(options?.Select?.JoinField));
 
             var selectedRecordSet = _selectionQueryEngine.Select(
+                document,
                 _documentStore.FindRecordSet(recordType),
                 queryOptions);
 
@@ -138,6 +141,16 @@ namespace rec_file_lib.DirectFileServer
             }
 
             return expression;
+        }
+
+        private static string? ParseJoinField(string? joinField)
+        {
+            if (string.IsNullOrWhiteSpace(joinField))
+            {
+                return null;
+            }
+
+            return joinField.Trim();
         }
     }
 }
