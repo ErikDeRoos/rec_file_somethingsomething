@@ -22,3 +22,9 @@
 - `DirectFileServerV1` and `SqlFileServerV1` must share the same internal engine where possible.
 - The direct API and SQL-like API are different façades over the same rec-oriented document and query capabilities.
 - Duplicate storage logic should be avoided.
+
+## Example and manual rule
+- Shared example data should live under `docs/examples` and be suitable for both documentation and tests.
+- Each example folder should include a `README.md` explaining what the example demonstrates.
+- GitHub-ready DLL documentation belongs under `docs/manual/dll`.
+- GitHub-ready editor documentation belongs under `docs/manual/editor`.

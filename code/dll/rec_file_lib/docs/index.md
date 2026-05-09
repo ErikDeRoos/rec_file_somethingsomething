@@ -3,7 +3,7 @@
 This file is the entry point for repository documentation.
 
 ## Purpose
-Use this index to quickly find where project planning, architecture guidance, and implementation notes are tracked.
+Use this index to quickly find where project planning, architecture guidance, manuals, and example-driven implementation notes are tracked.
 
 ## Files and directories
 
@@ -14,9 +14,9 @@ Primary documentation index for the repository. Start here.
 Project planning and phased delivery tracking.
 
 - `docs/project/00-roadmap.md`  
-  High-level roadmap, constraints, namespace layout, and phase overview.
+  High-level roadmap, constraints, namespace layout, phase overview, and current delivery direction.
 - `docs/project/01-phase-foundation.md`  
-  Foundation phase scope: model, parser, serializer, and validation groundwork.
+  Foundation phase scope: model, parser, serializer, validation groundwork, and example-driven first milestone.
 - `docs/project/02-phase-direct-file-server-v1.md`  
   Phase plan for the recutils-inspired direct API and COM-facing direct server.
 - `docs/project/03-phase-query-engine.md`  
@@ -24,7 +24,7 @@ Project planning and phased delivery tracking.
 - `docs/project/04-phase-sql-file-server-v1.md`  
   Phase plan for the SQL-like façade and session/metadata behavior.
 - `docs/project/05-com-and-unity-notes.md`  
-  Notes about COM exposure, Unity integration, result formats, and versioning direction.
+  Notes about COM exposure, Unity integration, result formats, documentation/manual placement, and versioning direction.
 
 ### `docs/architecture/`
 Architecture notes and long-lived engineering guidance.
@@ -34,9 +34,40 @@ Architecture notes and long-lived engineering guidance.
 - `docs/architecture/01-namespace-boundaries.md`  
   Namespace purposes, responsibilities, and dependency boundaries.
 - `docs/architecture/02-parsing-and-memory-practices.md`  
-  Parsing best practices, memory allocation practices, and portability notes.
+  Parsing best practices, memory allocation practices, portability notes, and example-driven parsing guidance.
+
+### `docs/manual/dll/`
+GitHub-ready documentation for the DLL/library itself.
+
+- `docs/manual/dll/index.md`  
+  DLL manual entry point.
+- `docs/manual/dll/current-capabilities.md`  
+  Snapshot of what the DLL supports today.
+- `docs/manual/dll/examples.md`  
+  Links from the DLL manual into the shared examples.
+
+### `docs/manual/editor/`
+GitHub-ready documentation for the future editor application.
+
+- `docs/manual/editor/index.md`  
+  Editor manual entry point.
+- `docs/manual/editor/roadmap.md`  
+  Editor-specific near-term goals and intended relationship to the DLL.
+
+### `docs/examples/`
+Shared example data used by documentation and tests.
+
+- `docs/examples/index.md`  
+  Example catalog and usage notes.
+- `docs/examples/1_simple_singlefile/README.md`  
+  Explains the first example and what it is intended to validate.
+- `docs/examples/1_simple_singlefile/user.rec`  
+  First tangible rec file used by both GitHub documentation and tests.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.
 - Put stable architectural rules and engineering boundaries in `docs/architecture/`.
+- Put GitHub-ready user-facing manuals in `docs/manual/dll/` and `docs/manual/editor/`.
+- Put shared example data and example readmes in `docs/examples/`.
+- Tests should read shared examples directly from `docs/examples` when validating realistic behavior.
 - Keep this file updated when new long-lived documentation is added.

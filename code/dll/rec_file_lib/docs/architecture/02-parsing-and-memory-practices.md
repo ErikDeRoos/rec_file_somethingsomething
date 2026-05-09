@@ -7,6 +7,7 @@
 - Keep parser behavior explicit when handling ambiguous or unsupported syntax.
 - Preserve enough source structure to support stable save behavior where practical.
 - Add functionality incrementally: core fields and descriptors first, advanced syntax later.
+- Use shared example files from `docs/examples` to validate realistic parsing behavior.
 - Isolate Windows-specific assumptions from parser logic.
 - Mark any parser behavior that may complicate future Linux or Unix portability.
 

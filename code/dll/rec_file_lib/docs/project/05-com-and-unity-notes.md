@@ -27,6 +27,13 @@ For complex outputs, prefer one of:
 ## Registration and packaging
 - Keep the production output centered on the single `rec_file_lib` assembly
 - Allow tests and developer docs to live separately
+- Keep GitHub-ready DLL documentation under `docs/manual/dll`
+- Keep GitHub-ready editor documentation under `docs/manual/editor`
+
+## Example-driven workflow
+- Shared example data lives under `docs/examples`
+- Tests should read realistic shared examples directly from `docs/examples`
+- Each example folder should include its own `README.md` explaining purpose and scope
 
 ## Versioning
 - `DirectFileServerV1` remains stable even as internal namespaces evolve

@@ -24,6 +24,7 @@ Expand the shared engine so both direct and SQL-like surfaces can rely on the sa
 - Start with the subset needed by `DirectFileServerV1`
 - Reuse the exact same engine later in `SqlFileServerV1`
 - Prefer incremental compatibility over a huge parser upfront
+- Use shared examples from `docs/examples` to validate realistic behavior as features are added
 
 ## Exit criteria
 - Shared query engine supports the direct API sufficiently

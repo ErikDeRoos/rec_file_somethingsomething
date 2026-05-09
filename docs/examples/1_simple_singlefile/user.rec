@@ -1,0 +1,15 @@
+# first example
+
+%rec: User
+
+Name: Erik
+Notes:
++ Thinks 'Inventing a new wheel is the best thing to do ever'.
++ 
++ Some x% of the people agree with that...
++ But does it matter? No percentage how little of how big, can be used to (by percentage alone) decide on its usefullness.
+
+Name: Buddy
+Notes:
++ Loyal dog.
++ Also goes by the name of 'Cuty-pie'.

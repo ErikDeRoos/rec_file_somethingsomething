@@ -25,6 +25,10 @@ Keep the API similar in intent to recutils operations, but COM-safe.
 - Simple arrays for lists
 - Explicit operation methods rather than exposing internal object graphs
 
+## Example-driven note
+- The first realistic target should work against `docs/examples/1_simple_singlefile/user.rec`
+- Tests should validate direct operations against shared example data where practical
+
 ## Internal dependencies
 - `Model`
 - `Parsing`

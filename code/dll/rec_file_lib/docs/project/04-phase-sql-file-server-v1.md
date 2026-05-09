@@ -31,6 +31,7 @@ Add a SQL-like facade over the shared rec engine while keeping all production co
 - Keep grammar small at first
 - Map commands to internal direct/query operations where possible
 - Return simple COM-safe results
+- Demonstrate early SQL-like behavior against shared examples before broadening scope
 
 ## Exit criteria
 - SQL-like interface can inspect and modify rec-backed data
