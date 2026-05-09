@@ -7,15 +7,23 @@ Provide the first COM-visible, recutils-inspired API for manipulating rec files 
 Keep the API similar in intent to recutils operations, but COM-safe and options-driven where method explosion would hurt maintainability.
 
 ## Current implemented slice
-- `RecSel(filePath, options)` with grouped selection options:
+- `RecSel(filePath, options)` with grouped selection/output options covering:
   - type (`-t` style)
   - index selection (`-n` style)
   - quick substring selection (`-q` style)
-  - field projection (`-p` style)
+  - expression subset (`-e` subset: `=`, `!=`, `~`)
+  - join (`-j` style, inner join)
+  - projection (`-p` style)
+  - grouping (`-G` groundwork)
+  - count aggregate groundwork
+  - sorting (`-S` style, ascending field sorting)
+  - collapse (`-C` style output sectioning)
+  - uniq (`-U` style field dedupe by name+value)
+  - include descriptors (`-d` style output)
 - `RecInsType(filePath, recordType, recordText)`
 - `RecDelType(filePath, recordType)`
 
-Selection options are modeled as COM-visible option classes in `DirectFileServer`.
+Selection and output options are modeled as COM-visible option classes in `DirectFileServer`.
 
 ## Functional scope
 - Create or open a rec file
@@ -27,8 +35,7 @@ Selection options are modeled as COM-visible option classes in `DirectFileServer
 - Replace records
 - Delete records
 - Add, set, delete, and rename fields
-- Select records by type, index, quick substring, and simple expression
-- Join records using foreign-key style fields
+- Select records by type, index, quick substring, expression subset, join, grouping, sorting, and projection
 
 ## Suggested public contract style
 - Tool-shaped operations such as `RecSel` and `RecInsType`
@@ -39,7 +46,7 @@ Selection options are modeled as COM-visible option classes in `DirectFileServer
 
 ## Example-driven note
 - `docs/examples/1_simple_singlefile/user.rec` validates the single-record-set path
-- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` validates typed selection, indexes, quick filtering, and projection combinations
+- `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` validates typed selection, indexes, quick filtering, expression subset, join, grouping/count, sorting, collapse, uniq, and include-descriptor combinations
 - `docs/examples/2_simple_recutils_book_example/books.rec` and `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec` validate `RecInsType`
 - malformed examples under `docs/examples/3_wrong_...` through `7_wrong_...` help verify current insertion and deletion error handling
 

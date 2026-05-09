@@ -48,8 +48,10 @@
 - Shared example scenario wrappers are in place for tests
 - Valid and malformed example sets are both part of the workflow
 - `DirectFileServerV1` now uses an options-based selection API: `RecSel(filePath, options)`
-- Selection options are grouped as type/select/project with support for index and quick substring selection
+- Selection options are grouped and now cover type/select/project/group/aggregate/sort concerns
+- Implemented recsel-aligned option slices include: index, quick substring, expression subset, join, grouping with count aggregate, sorting, collapse, uniq, and include-descriptors output behavior
 - A dedicated internal query layer is introduced (`rec_file_lib.Query`) and used by `DirectFileServerV1`
+- Operation-order tests now explicitly verify recutils-aligned sequencing for selection/filtering, grouping, sorting, and projection
 
 ## Current examples
 ### Valid examples
@@ -73,12 +75,12 @@
 - Parse malformed semantic examples for later validation
 - Fail early on malformed syntactical examples
 - Provide options-based direct selection through `RecSel(filePath, options)`
-- Provide type selection, index selection, projection, and quick substring filtering in direct selection
+- Provide type selection, index selection, quick filtering, expression subset, projection, join, grouping/count, sorting, collapse, uniq, and include-descriptors behavior in direct selection
 - Provide initial typed record insertion with validation-aware file updates
-- Provide query-layer unit coverage for selection/projection/filter combinations
+- Provide query-layer unit coverage for selection/projection/filter/group/sort/uniq combinations
 
 ## Next likely deliverables
 - Expand validation logic for semantic-invalid examples
-- Add expression-based selection into the shared query layer
-- Extend query engine capabilities (sorting, join expansion, grouping groundwork)
+- Add case-insensitive matching (`-i`) behavior
+- Extend aggregate support beyond count and continue tightening recutils-compatibility semantics
 - Evolve DirectFileServer result access toward structured cursor or reader-style patterns

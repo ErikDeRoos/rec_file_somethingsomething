@@ -26,7 +26,20 @@ For complex outputs, prefer a long-term direction based on:
 - cursor or reader-style iteration
 - compatibility formatting layered on top when needed
 
-For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior for methods such as `RecSel(filePath, options)`, `RecInsType`, and `RecDelType`.
+For now, plain text output is used as the compatibility layer for methods such as `RecSel(filePath, options)`, `RecInsType`, and `RecDelType`.
+
+Current `RecSel(filePath, options)` supports options for:
+- type selection
+- index selection
+- quick filtering
+- expression subset
+- join
+- projection
+- grouping/count groundwork
+- sorting
+- collapse
+- uniq
+- include descriptors
 
 ## Registration and packaging
 - Keep the production output centered on the single `rec_file_lib` assembly

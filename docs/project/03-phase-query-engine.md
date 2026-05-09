@@ -13,11 +13,17 @@ Expand the shared engine so both direct and SQL-like surfaces can rely on the sa
 
 ## Current implemented subset
 - Shared query layer introduced under `rec_file_lib.Query`
-- Selection query options model used by DirectFileServer:
+- Selection query options model used by DirectFileServer now covers:
   - index selection (`-n` style)
   - quick substring filtering (`-q` style)
+  - expression subset (`-e` subset)
+  - join (`-j` style inner join)
   - projection (`-p` style)
+  - grouping groundwork with count aggregate
+  - sorting by field list
+  - uniq field deduplication behavior
 - Dedicated unit tests for query logic combinations and edge cases
+- Explicit tests verify recutils-aligned operation ordering for selection/filtering, grouping, sorting, and projection
 
 ## Priority order
 1. Type selection
