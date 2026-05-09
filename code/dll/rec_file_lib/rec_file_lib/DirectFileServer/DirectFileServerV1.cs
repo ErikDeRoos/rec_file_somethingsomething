@@ -20,10 +20,11 @@ namespace rec_file_lib.DirectFileServer
             _documentStore.LoadFromFile(filePath);
 
             var collapse = options?.Select?.Collapse ?? false;
+            var includeDescriptors = options?.Select?.IncludeDescriptors ?? false;
             var recordType = options?.Type?.RecordType;
             if (string.IsNullOrEmpty(recordType))
             {
-                return _recSelFormatter.FormatSelection(_documentStore.GetDocument(), collapse);
+                return _recSelFormatter.FormatSelection(_documentStore.GetDocument(), collapse, includeDescriptors);
             }
 
             var document = _documentStore.GetDocument();
@@ -44,7 +45,7 @@ namespace rec_file_lib.DirectFileServer
                 _documentStore.FindRecordSet(recordType),
                 queryOptions);
 
-            return _recSelFormatter.FormatRecordSet(selectedRecordSet, collapse);
+            return _recSelFormatter.FormatRecordSet(selectedRecordSet, collapse, includeDescriptors);
         }
 
         public string RecInsType(string filePath, string recordType, string recordText)

@@ -5,7 +5,7 @@ namespace rec_file_lib.DirectFileServer;
 
 internal sealed class DirectRecSelFormatter
 {
-    public string FormatSelection(RecFileDocument document, bool collapse = false)
+    public string FormatSelection(RecFileDocument document, bool collapse = false, bool includeDescriptors = false)
     {
         ArgumentNullException.ThrowIfNull(document);
 
@@ -19,10 +19,10 @@ internal sealed class DirectRecSelFormatter
             throw new InvalidOperationException("several record types found. Please use -t to specify one.");
         }
 
-        return FormatRecordSet(document.RecordSets[0], collapse);
+        return FormatRecordSet(document.RecordSets[0], collapse, includeDescriptors);
     }
 
-    public string FormatRecordSet(RecRecordSet? recordSet, bool collapse = false)
+    public string FormatRecordSet(RecRecordSet? recordSet, bool collapse = false, bool includeDescriptors = false)
     {
         if (recordSet is null)
         {
@@ -30,8 +30,31 @@ internal sealed class DirectRecSelFormatter
         }
 
         using var writer = new StringWriter();
+
+        if (includeDescriptors)
+        {
+            WriteDescriptor(writer, recordSet);
+            if (recordSet.Records.Count > 0)
+            {
+                writer.WriteLine();
+            }
+        }
+
         WriteRecordSetRecords(writer, recordSet, collapse);
         return writer.ToString().TrimEnd('\r', '\n');
+    }
+
+    private static void WriteDescriptor(TextWriter writer, RecRecordSet recordSet)
+    {
+        if (!string.IsNullOrWhiteSpace(recordSet.TypeName))
+        {
+            writer.WriteLine($"%rec: {recordSet.TypeName}");
+        }
+
+        foreach (var descriptorField in recordSet.Descriptor.Fields)
+        {
+            WriteField(writer, descriptorField);
+        }
     }
 
     private static void WriteRecordSetRecords(TextWriter writer, RecRecordSet recordSet, bool collapse)

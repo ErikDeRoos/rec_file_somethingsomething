@@ -1196,6 +1196,95 @@ public sealed class DirectFileServerV1Tests
             NormalizeForComparison(output));
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndIncludeDescriptors_IncludesDescriptorBeforeRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { IncludeDescriptors = true }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                %rec: Person
+                %type: Abode rec Residence
+
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeIncludeDescriptorsAndCollapse_CombinesBothBehaviors()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { IncludeDescriptors = true, Collapse = true }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                %rec: Person
+                %type: Abode rec Residence
+
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeIncludeDescriptorsAndNoMatchedRecords_StillIncludesDescriptor()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { IncludeDescriptors = true, Quick = "__no_match__" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                %rec: Person
+                %type: Abode rec Residence
+                """),
+            NormalizeForComparison(output));
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

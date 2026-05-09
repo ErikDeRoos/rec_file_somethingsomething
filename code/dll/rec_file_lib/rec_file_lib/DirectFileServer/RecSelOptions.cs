@@ -45,6 +45,8 @@ public class RecSelSelectOptions
     public bool Collapse { get; set; }
 
     public bool Uniq { get; set; }
+
+    public bool IncludeDescriptors { get; set; }
 }
 
 [ComVisible(true)]
