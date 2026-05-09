@@ -7,6 +7,6 @@ namespace rec_file_lib
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IDirectFileServer
     {
-        
+        string RecSel(string filePath);
     }
 }

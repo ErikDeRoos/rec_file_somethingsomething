@@ -23,6 +23,11 @@ This page tracks what the DLL supports today.
 - `%mandatory`
 - `%doc`
 
+## Direct API status
+- `DirectFileServerV1` now exposes an initial tool-shaped `RecSel(filePath)` method
+- Current `RecSel` output is formatted text intended as a recutils-style compatibility layer
+- The preferred longer-term direction is structured cursor or reader-style result access rather than raw text as the main contract
+
 ## Current example coverage
 ### Valid examples
 - `docs/examples/1_simple_singlefile/user.rec`
@@ -37,4 +42,5 @@ This page tracks what the DLL supports today.
 
 ## Next capability target
 - Add validation logic for semantic-invalid examples
-- Build the first minimal `DirectFileServerV1` API over the current foundation
+- Evolve DirectFileServer result access toward structured cursor or reader-style patterns
+- Add the next small recutils-style direct operation only after the result-shape direction stays coherent

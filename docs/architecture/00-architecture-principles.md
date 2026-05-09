@@ -23,6 +23,13 @@
 - The direct API and SQL-like API are different façades over the same rec-oriented document and query capabilities.
 - Duplicate storage logic should be avoided.
 
+## Direct API result-shape rule
+- Direct tool-style operations should mirror recutils naming and intent, such as `RecSel`.
+- Formatted text output is a compatibility and view layer, not the main internal data contract.
+- The preferred long-term direction for direct query-like results is a cursor or reader pattern with structured iterable access.
+- That result-shape direction should remain compatible with future async patterns.
+- Heavy table-shaped contracts such as `DataTable` should not be the default primary interface.
+
 ## Example and manual rule
 - Shared example data should live under `docs/examples` and be suitable for both documentation and tests.
 - Each example folder should include a `README.md` explaining what the example demonstrates.

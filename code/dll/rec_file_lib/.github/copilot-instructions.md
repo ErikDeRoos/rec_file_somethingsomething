@@ -18,3 +18,8 @@
 
 ## Parser Architecture Guidelines
 - Parser architecture should be more memory-efficient: prefer stream-based reading, token inspection with cached/preloaded parsing decisions, and avoid whole-text line enumeration when possible.
+
+## API Design Guidelines
+- User prefers the DirectFileServerV1 public API to mirror recutils tool-style commands, e.g., direct methods like `RecSel(filename)` or tool-shaped accessors, with outputs similar to recutils command output.
+- User prefers not to return raw strings from the main API when avoidable; favor structured response wrappers and potentially reader/stream-style access over heavy DataTable-style contracts by default.
+- Prefer a cursor/reader pattern with structured iterable result access for DirectFileServer, including future async support; formatted text is a compatibility/view layer, not the main internal data contract.

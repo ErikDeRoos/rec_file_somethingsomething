@@ -57,6 +57,7 @@ Provide record selection, projection, joins, sorting, and later aggregate behavi
 ### Can do
 - Execute selection and transformation logic over the model.
 - Provide shared behavior used by direct and SQL-like APIs.
+- Feed both cursor-style result access and optional formatted output layers.
 
 ### Cannot do
 - Parse SQL command text directly unless a dedicated SQL parsing sub-area is explicitly introduced.
@@ -69,9 +70,12 @@ Provide the recutils-inspired direct API surface.
 ### Can do
 - Coordinate document operations using parsing, model, validation, and query namespaces.
 - Expose COM-visible direct manipulation methods.
+- Provide tool-shaped operations such as `RecSel`.
+- Adapt shared results into compatibility text output where needed.
 
 ### Cannot do
 - Reimplement parser, validation, or core query rules locally.
+- Treat formatted text as the long-term primary internal result contract.
 - Bypass shared engine rules without explicit justification.
 
 ## `rec_file_lib.SqlFileServer`
@@ -93,6 +97,7 @@ Hold interop-specific concerns, COM adaptation helpers, marshalling-facing DTOs,
 ### Can do
 - Isolate COM-related implementation details.
 - Provide adapter shapes between public COM contracts and internal engine operations.
+- Carry compatibility output layers while internal result contracts evolve.
 
 ### Cannot do
 - Own domain logic for parsing, validation, or queries.

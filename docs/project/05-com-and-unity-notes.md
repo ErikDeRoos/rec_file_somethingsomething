@@ -19,10 +19,12 @@ Avoid exposing:
 - implementation-specific parser/query objects
 
 ## Result format guidance
-For complex outputs, prefer one of:
-- plain rec text
-- JSON strings
-- delimited string arrays
+For complex outputs, prefer a long-term direction based on:
+- structured response wrappers
+- cursor or reader-style iteration
+- compatibility formatting layered on top when needed
+
+For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior.
 
 ## Registration and packaging
 - Keep the production output centered on the single `rec_file_lib` assembly
@@ -38,3 +40,4 @@ For complex outputs, prefer one of:
 ## Versioning
 - `DirectFileServerV1` remains stable even as internal namespaces evolve
 - `SqlFileServerV1` grows incrementally behind a stable COM boundary
+- Future result-shape changes that are not backward compatible should be versioned deliberately
