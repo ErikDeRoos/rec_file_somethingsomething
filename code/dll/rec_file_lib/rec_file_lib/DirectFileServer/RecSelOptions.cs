@@ -17,6 +17,8 @@ public class RecSelOptions
     public RecSelGroupOptions Group { get; set; } = new();
 
     public RecSelAggregateOptions Aggregate { get; set; } = new();
+
+    public RecSelSortOptions Sort { get; set; } = new();
 }
 
 [ComVisible(true)]
@@ -65,4 +67,12 @@ public class RecSelAggregateOptions
     public bool Count { get; set; }
 
     public string CountFieldName { get; set; } = "Count";
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecSelSortOptions)]
+[ClassInterface(ClassInterfaceType.AutoDual)]
+public class RecSelSortOptions
+{
+    public string[] FieldNames { get; set; } = Array.Empty<string>();
 }

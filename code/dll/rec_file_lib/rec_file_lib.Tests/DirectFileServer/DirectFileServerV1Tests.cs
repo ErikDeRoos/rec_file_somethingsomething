@@ -969,6 +969,65 @@ public sealed class DirectFileServerV1Tests
             NormalizeForComparison(output));
     }
 
+    [Fact]
+    public void RecSel_WithTypeAndSortBySingleField_SortsOutputAscending()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Sort = new RecSelSortOptions { FieldNames = ["Name"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+
+                Name: Ernest Wright
+                Abode: ChezGrampa
+
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeGroupByCountAndSort_SortsGroupedOutput()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Group = new RecSelGroupOptions { FieldNames = ["Abode"] },
+                Aggregate = new RecSelAggregateOptions { Count = true, CountFieldName = "Total" },
+                Sort = new RecSelSortOptions { FieldNames = ["Abode"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Abode: 42AbbeterWay
+                Total: 2
+
+                Abode: ChezGrampa
+                Total: 1
+                """),
+            NormalizeForComparison(output));
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

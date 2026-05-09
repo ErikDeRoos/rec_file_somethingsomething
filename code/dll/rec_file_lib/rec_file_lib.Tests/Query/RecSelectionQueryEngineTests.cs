@@ -334,6 +334,66 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("Alfred Nebel", result.Records[0].Fields[0].Value);
     }
 
+    [Fact]
+    public void Select_WithSortBySingleField_SortsAscendingByFieldValue()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(SortFields: ["Name"]));
+
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[1], "Name"));
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[2], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithSortByMultipleFields_AppliesFieldOrder()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(SortFields: ["Abode", "Name"]));
+
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[1], "Name"));
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[2], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithGroupByCountAndSort_SortsGroupedResult()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(
+                GroupByFields: ["Abode"],
+                Count: true,
+                CountFieldName: "Total",
+                SortFields: ["Abode"]));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("42AbbeterWay", GetFieldValue(result.Records[0], "Abode"));
+        Assert.Equal("ChezGrampa", GetFieldValue(result.Records[1], "Abode"));
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,
@@ -342,7 +402,8 @@ public sealed class RecSelectionQueryEngineTests
         string? JoinField = null,
         IReadOnlyList<string>? GroupByFields = null,
         bool Count = false,
-        string CountFieldName = "Count")
+        string CountFieldName = "Count",
+        IReadOnlyList<string>? SortFields = null)
     {
         return new RecSelectionQueryOptions(
             ProjectedFields,
@@ -352,7 +413,8 @@ public sealed class RecSelectionQueryEngineTests
             JoinField,
             GroupByFields,
             Count,
-            CountFieldName);
+            CountFieldName,
+            SortFields);
     }
 
     private static RecFileDocument CreatePeopleAndResidencesDocument()

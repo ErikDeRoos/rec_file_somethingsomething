@@ -14,6 +14,7 @@ namespace rec_file_lib
         public const string DirectFileServer_RecSelProjectOptions = "6479ed67-a4ba-4818-8f8f-bf6db9d11c95";
         public const string DirectFileServer_RecSelGroupOptions = "3f57f937-7e8d-4e20-9b62-d9c2f3146527";
         public const string DirectFileServer_RecSelAggregateOptions = "b4b87d2a-c953-4bf3-9249-a28d463ec6d5";
+        public const string DirectFileServer_RecSelSortOptions = "28b87792-9aad-4224-a6af-6d15f4dc423d";
         public const string SqlFileServer_Interface = "8752b361-a871-4fa7-bafc-89850fcf42d0";
         public const string SqlFileServer_Implementation_V1 = "d293041b-3aa4-4b1e-9592-a53ee508372a";
     }

@@ -34,7 +34,8 @@ namespace rec_file_lib.DirectFileServer
                 JoinField: ParseJoinField(options?.Select?.JoinField),
                 GroupByFields: ParseGroupByFields(options?.Group?.FieldNames),
                 Count: options?.Aggregate?.Count ?? false,
-                CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName));
+                CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName),
+                SortFields: ParseSortFields(options?.Sort?.FieldNames));
 
             var selectedRecordSet = _selectionQueryEngine.Select(
                 document,
@@ -179,6 +180,21 @@ namespace rec_file_lib.DirectFileServer
             }
 
             return countFieldName.Trim();
+        }
+
+        private static IReadOnlyList<string>? ParseSortFields(string[]? fieldNames)
+        {
+            if (fieldNames is null || fieldNames.Length == 0)
+            {
+                return null;
+            }
+
+            var normalized = fieldNames
+                .Where(static name => !string.IsNullOrWhiteSpace(name))
+                .Select(static name => name.Trim())
+                .ToArray();
+
+            return normalized.Length == 0 ? null : normalized;
         }
     }
 }

@@ -40,8 +40,9 @@ internal sealed class RecSelectionQueryEngine
         }
 
         var groupedRecords = ApplyGroupingAndCount(filteredRecords, options.GroupByFields, options.Count, options.CountFieldName);
+        var sortedRecords = ApplySorting(groupedRecords, options.SortFields);
 
-        var projectedRecords = groupedRecords
+        var projectedRecords = sortedRecords
             .Select(record => ProjectRecord(record, options.ProjectedFields))
             .ToArray();
 
@@ -108,6 +109,44 @@ internal sealed class RecSelectionQueryEngine
         }
 
         return grouped;
+    }
+
+    private static IReadOnlyList<RecRecord> ApplySorting(IReadOnlyList<RecRecord> records, IReadOnlyList<string>? sortFields)
+    {
+        if (sortFields is null || sortFields.Count == 0 || records.Count <= 1)
+        {
+            return records;
+        }
+
+        var indexed = records
+            .Select((record, index) => new { Record = record, Index = index })
+            .ToList();
+
+        indexed.Sort((left, right) => CompareBySortFields(left.Record, right.Record, sortFields, left.Index, right.Index));
+
+        return indexed.Select(item => item.Record).ToArray();
+    }
+
+    private static int CompareBySortFields(
+        RecRecord left,
+        RecRecord right,
+        IReadOnlyList<string> sortFields,
+        int leftOriginalIndex,
+        int rightOriginalIndex)
+    {
+        foreach (var sortField in sortFields)
+        {
+            var leftValue = TryGetFieldValue(left, sortField) ?? string.Empty;
+            var rightValue = TryGetFieldValue(right, sortField) ?? string.Empty;
+
+            var compare = string.CompareOrdinal(leftValue, rightValue);
+            if (compare != 0)
+            {
+                return compare;
+            }
+        }
+
+        return leftOriginalIndex.CompareTo(rightOriginalIndex);
     }
 
     private static RecRecordSet ApplyJoinIfRequested(RecFileDocument document, RecRecordSet sourceRecordSet, string? joinField)
