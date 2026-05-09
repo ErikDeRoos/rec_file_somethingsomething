@@ -169,3 +169,41 @@ public class RecSelSortOptions : IRecSelSortOptions
 {
     public string[] FieldNames { get; set; } = Array.Empty<string>();
 }
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecInsOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecInsOptions
+{
+    string RecordType { get; set; }
+
+    string RecordText { get; set; }
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecInsOptions)]
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecInsOptions))]
+public class RecInsOptions : IRecInsOptions
+{
+    public string RecordType { get; set; } = string.Empty;
+
+    public string RecordText { get; set; } = string.Empty;
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecDelOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecDelOptions
+{
+    string RecordType { get; set; }
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecDelOptions)]
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecDelOptions))]
+public class RecDelOptions : IRecDelOptions
+{
+    public string RecordType { get; set; } = string.Empty;
+}

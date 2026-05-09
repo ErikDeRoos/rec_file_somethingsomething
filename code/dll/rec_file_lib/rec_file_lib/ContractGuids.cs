@@ -30,6 +30,12 @@ namespace rec_file_lib
         public const string DirectFileServer_IRecSelSortOptions = "78f2fb80-5a8d-4102-bc2b-44cf257a8d9c";
         public const string DirectFileServer_RecSelSortOptions = "28b87792-9aad-4224-a6af-6d15f4dc423d";
 
+        public const string DirectFileServer_IRecInsOptions = "c2fcd8e8-1ef3-4f49-af55-57c7dd5d78a7";
+        public const string DirectFileServer_RecInsOptions = "673c90bc-b51d-4731-8d1b-57a5ea92531a";
+
+        public const string DirectFileServer_IRecDelOptions = "6f3ce9d2-5db8-4c71-a39a-0f5f32004733";
+        public const string DirectFileServer_RecDelOptions = "5887984a-eb31-4f5d-8160-6c5cd99fa4dd";
+
         public const string DirectFileServer_IRecSelTypedResult = "e1a0f6b0-97ac-4b56-8122-94f5a5a4c903";
         public const string DirectFileServer_RecSelTypedResult = "8e9d8a64-f315-4fd2-a4de-8df91053d5d9";
 

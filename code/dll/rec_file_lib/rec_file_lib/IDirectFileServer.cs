@@ -12,8 +12,12 @@ namespace rec_file_lib
 
         IRecSelTypedResult RecSel_Typed(string filePath, IRecSelOptions options);
 
-        string RecInsType(string filePath, string recordType, string recordText);
+        string RecIns(string filePath, IRecInsOptions options);
 
-        string RecDelType(string filePath, string recordType);
+        IRecSelTypedResult RecIns_Typed(string filePath, IRecInsOptions options);
+
+        string RecDel(string filePath, IRecDelOptions options);
+
+        IRecSelTypedResult RecDel_Typed(string filePath, IRecDelOptions options);
     }
 }

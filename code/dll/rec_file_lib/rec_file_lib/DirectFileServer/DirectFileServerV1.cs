@@ -77,25 +77,80 @@ namespace rec_file_lib.DirectFileServer
             }
         }
 
-        public string RecInsType(string filePath, string recordType, string recordText)
+        public string RecIns(string filePath, IRecInsOptions options)
         {
-            ArgumentNullException.ThrowIfNull(recordType);
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(options.RecordType);
 
             _documentStore.LoadFromFile(filePath);
-            var record = _mutationParser.ParseRecord(recordText);
-            var updatedRecordSet = _documentStore.InsertRecord(recordType, record);
+            var record = _mutationParser.ParseRecord(options.RecordText);
+            var updatedRecordSet = _documentStore.InsertRecord(options.RecordType, record);
             _documentStore.SaveToFile(filePath);
             return _recSelFormatter.FormatRecordSet(updatedRecordSet);
         }
 
-        public string RecDelType(string filePath, string recordType)
+        public IRecSelTypedResult RecIns_Typed(string filePath, IRecInsOptions options)
         {
-            ArgumentNullException.ThrowIfNull(recordType);
+            try
+            {
+                ArgumentNullException.ThrowIfNull(options);
+                ArgumentNullException.ThrowIfNull(options.RecordType);
+
+                _documentStore.LoadFromFile(filePath);
+                var record = _mutationParser.ParseRecord(options.RecordText);
+                var updatedRecordSet = _documentStore.InsertRecord(options.RecordType, record);
+                _documentStore.SaveToFile(filePath);
+                return RecSelTypedResult.Success(updatedRecordSet);
+            }
+            catch (FormatException ex)
+            {
+                return RecSelTypedResult.Error(3, ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return RecSelTypedResult.Error(4, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return RecSelTypedResult.Error(5, ex.Message);
+            }
+        }
+
+        public string RecDel(string filePath, IRecDelOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(options.RecordType);
 
             _documentStore.LoadFromFile(filePath);
-            var updatedRecordSet = _documentStore.DeleteRecords(recordType);
+            var updatedRecordSet = _documentStore.DeleteRecords(options.RecordType);
             _documentStore.SaveToFile(filePath);
             return _recSelFormatter.FormatRecordSet(updatedRecordSet);
+        }
+
+        public IRecSelTypedResult RecDel_Typed(string filePath, IRecDelOptions options)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(options);
+                ArgumentNullException.ThrowIfNull(options.RecordType);
+
+                _documentStore.LoadFromFile(filePath);
+                var updatedRecordSet = _documentStore.DeleteRecords(options.RecordType);
+                _documentStore.SaveToFile(filePath);
+                return RecSelTypedResult.Success(updatedRecordSet);
+            }
+            catch (FormatException ex)
+            {
+                return RecSelTypedResult.Error(3, ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return RecSelTypedResult.Error(4, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return RecSelTypedResult.Error(5, ex.Message);
+            }
         }
 
         private RecRecordSet? SelectRecordSet(RecFileDocument document, string recordType, IRecSelOptions? options)
