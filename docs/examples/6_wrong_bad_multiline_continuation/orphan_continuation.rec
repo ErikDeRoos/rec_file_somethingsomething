@@ -1,0 +1,4 @@
+%rec: Note
+
++ This continuation line is intentionally invalid because no field started before it.
+Title: Example

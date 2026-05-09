@@ -9,9 +9,20 @@ Shared examples in this directory are used for two purposes at the same time:
 - Each example lives in its own folder.
 - Each example folder has its own `README.md`.
 - Tests should read example files directly from `docs/examples` when validating realistic behavior.
+- Intentionally invalid examples should clearly state that they are wrong, why they fail, and how to fix them.
 
 ## Current examples
 - `docs/examples/1_simple_singlefile/`
   - Minimal single-file example with a typed `User` record set, a comment header, and multiline field data.
 - `docs/examples/2_simple_recutils_book_example/`
   - Recutils-inspired books example with descriptor fields, repeated fields, and multiple records.
+- `docs/examples/3_wrong_missing_mandatory_field/`
+  - Intentionally invalid example showing a `%mandatory` rule violation.
+- `docs/examples/4_wrong_duplicate_key_value/`
+  - Intentionally invalid example showing duplicate `%key` values.
+- `docs/examples/5_wrong_invalid_field_type/`
+  - Intentionally invalid example showing a field value that violates a declared type.
+- `docs/examples/6_wrong_bad_multiline_continuation/`
+  - Intentionally invalid example showing a continuation line without a current field.
+- `docs/examples/7_wrong_missing_field_separator/`
+  - Intentionally invalid example showing a malformed field line without the `:` separator.

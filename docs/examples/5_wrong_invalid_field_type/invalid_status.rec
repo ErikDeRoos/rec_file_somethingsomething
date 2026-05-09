@@ -1,0 +1,5 @@
+%rec: Task
+%type: Status enum open closed
+
+Title: Implement parser
+Status: pending

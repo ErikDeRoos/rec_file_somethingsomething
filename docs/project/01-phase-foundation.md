@@ -7,9 +7,23 @@ Create the internal engine needed by both `DirectFileServerV1` and `SqlFileServe
 - In-memory model for rec files
 - Parser for records, fields, comments, and descriptors
 - Serializer for writing rec data back to text
-- Initial validation for descriptor-driven rules
-- Early separate test project
+- Initial validation groundwork for descriptor-driven rules
+- Separate test project
 - Tests that read shared example files directly from `docs/examples`
+
+## Current implementation status
+### Implemented
+- Immutable runtime model using record classes
+- Builder types used as mutable parser staging structures
+- Parser for records, fields, comments, descriptor fields, and multiline values
+- Serializer with round-trip coverage for valid examples
+- Shared example scenario wrapper for tests
+- Tests for valid examples and malformed parser scenarios
+
+### Still to do in foundation
+- Validation layer for semantic-invalid examples
+- Broader descriptor support beyond the currently used subset
+- More malformed input coverage as edge cases are identified
 
 ## Proposed folders and namespaces
 - `Common/`
@@ -21,16 +35,15 @@ Create the internal engine needed by both `DirectFileServerV1` and `SqlFileServe
 - `SqlFileServer/`
 - `Interop/`
 
-## Initial model types
+## Current model types
 - `RecFileDocument`
 - `RecRecordSet`
 - `RecDescriptor`
 - `RecRecord`
 - `RecField`
-- `RecFieldTypeDefinition`
-- `RecSelectionResult`
+- builder variants for parser mutation
 
-## Parsing targets
+## Parsing targets currently covered
 - Fields
 - Multiline fields using `+`
 - Records separated by blank lines
@@ -38,18 +51,13 @@ Create the internal engine needed by both `DirectFileServerV1` and `SqlFileServe
 - `%rec`
 - `%type`
 - `%mandatory`
-- `%allowed`
-- `%prohibit`
-- `%unique`
 - `%key`
-- `%sort`
-- `%auto`
+- `%doc`
 
-## First example-driven milestone
-- Use `docs/examples/1_simple_singlefile/user.rec`
-- The file acts as both documentation material and test input
-- First tests should prove the document can be loaded, parsed, inspected, and saved
-- The first example is intentionally minimal: typed record set, comment line, and multiline field data
+## Example-driven milestone status
+- `docs/examples/1_simple_singlefile/user.rec` is covered by parser and serializer tests
+- `docs/examples/2_simple_recutils_book_example/books.rec` is covered by parser and serializer tests
+- malformed examples under `docs/examples/3_wrong_...` through `7_wrong_...` now help define parser-versus-validator boundaries
 
 ## Non-goals for first cut
 - Full expression grammar
@@ -62,5 +70,5 @@ Create the internal engine needed by both `DirectFileServerV1` and `SqlFileServe
 - Load a `.rec` file into the model
 - Save the model back to `.rec`
 - Preserve enough structure for data operations
-- Basic validation can detect obvious descriptor violations
 - Tests can read shared example files directly from `docs/examples`
+- Semantic-invalid examples are ready to be used by the future validation layer

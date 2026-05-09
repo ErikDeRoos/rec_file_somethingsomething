@@ -1,0 +1,5 @@
+%rec: Article
+%key Id
+
+Name: Thing
+Id: 0

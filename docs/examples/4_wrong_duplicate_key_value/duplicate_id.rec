@@ -1,0 +1,8 @@
+%rec: Item
+%key: Id
+
+Id: 1
+Title: First item
+
+Id: 1
+Title: Duplicate key value

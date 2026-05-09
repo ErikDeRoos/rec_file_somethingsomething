@@ -2,7 +2,7 @@
 
 ## Constraints
 - One production project: `rec_file_lib`
-- Separate test project is required and should be introduced early
+- Separate test project is required and has been introduced early
 - A separate desktop editor project will live in the same repository later
 - Production output should stay a single runtime DLL
 - COM-visible entry points remain small and Unity-friendly
@@ -41,16 +41,35 @@
 - Every commit should add a visible working increment backed by tests where practical
 - Shared example files should anchor both documentation and realistic test coverage
 
-## Current first example
-- `docs/examples/1_simple_singlefile/user.rec`
-- The first example is intentionally small
-- It demonstrates a typed record set, a comment line, and multiline field data
-- It is intended to be read directly by future tests
+## Current status
+- Immutable record-based runtime model is in place
+- Builder-based parsing flow is in place
+- Stream-capable parser and serializer are implemented
+- Shared example scenario wrappers are in place for tests
+- Valid and malformed example sets are both part of the workflow
 
-## Initial deliverables
+## Current examples
+### Valid examples
+- `docs/examples/1_simple_singlefile/user.rec`
+- `docs/examples/2_simple_recutils_book_example/books.rec`
+
+### Intentionally invalid examples
+- `docs/examples/3_wrong_missing_mandatory_field/missing_name.rec`
+- `docs/examples/4_wrong_duplicate_key_value/duplicate_id.rec`
+- `docs/examples/5_wrong_invalid_field_type/invalid_status.rec`
+- `docs/examples/6_wrong_bad_multiline_continuation/orphan_continuation.rec`
+- `docs/examples/7_wrong_missing_field_separator/missing_colon.rec`
+
+## Current deliverables already implemented
 - Load and save `.rec` files
 - Parse descriptors and records
-- Start from the shared example in `docs/examples`
-- Create, update, and delete records and fields
-- Basic selection and joins
-- SQL-like facade over the same engine after direct API is stable
+- Parse comments and multiline fields
+- Preserve descriptor order for serialization
+- Round-trip valid examples through parser and serializer
+- Parse malformed semantic examples for later validation
+- Fail early on malformed syntactical examples
+
+## Next likely deliverables
+- Introduce validation logic for semantic-invalid examples
+- Start the first minimal `DirectFileServerV1` API over the current parser/serializer foundation
+- Expand example coverage as new behaviors are added

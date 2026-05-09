@@ -67,11 +67,31 @@ Shared example data used by documentation and tests.
   Explains the recutils-inspired books example and what it validates.
 - `docs/examples/2_simple_recutils_book_example/books.rec`  
   Recutils-derived books example used by documentation and tests.
+- `docs/examples/3_wrong_missing_mandatory_field/README.md`  
+  Explains the intentionally invalid missing-mandatory-field example and how to fix it.
+- `docs/examples/3_wrong_missing_mandatory_field/missing_name.rec`  
+  Invalid example showing a `%mandatory` rule violation.
+- `docs/examples/4_wrong_duplicate_key_value/README.md`  
+  Explains the intentionally invalid duplicate-key example and how to fix it.
+- `docs/examples/4_wrong_duplicate_key_value/duplicate_id.rec`  
+  Invalid example showing duplicate `%key` values.
+- `docs/examples/5_wrong_invalid_field_type/README.md`  
+  Explains the intentionally invalid type-mismatch example and how to fix it.
+- `docs/examples/5_wrong_invalid_field_type/invalid_status.rec`  
+  Invalid example showing a field value that violates a declared type.
+- `docs/examples/6_wrong_bad_multiline_continuation/README.md`  
+  Explains the intentionally invalid multiline continuation example and how to fix it.
+- `docs/examples/6_wrong_bad_multiline_continuation/orphan_continuation.rec`  
+  Invalid example showing a continuation line without an active field.
+- `docs/examples/7_wrong_missing_field_separator/README.md`  
+  Explains the intentionally invalid missing-colon example and how to fix it.
+- `docs/examples/7_wrong_missing_field_separator/missing_colon.rec`  
+  Invalid example showing a malformed field line without the `:` separator.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.
 - Put stable architectural rules and engineering boundaries in `docs/architecture/`.
 - Put GitHub-ready user-facing manuals in `docs/manual/dll/` and `docs/manual/editor/`.
-- Put shared example data and example readmes in `docs/examples/`.
+- Put shared example data and example readmes in `docs/examples`.
 - Tests should read shared examples directly from `docs/examples` when validating realistic behavior.
 - Keep this file updated when new long-lived documentation is added.

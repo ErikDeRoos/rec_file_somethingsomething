@@ -1,0 +1,7 @@
+%rec: User
+%mandatory: Name
+
+Name: Erik
+Notes: Valid record.
+
+Notes: This record is intentionally invalid because it does not provide the mandatory Name field.

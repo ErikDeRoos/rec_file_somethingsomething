@@ -26,5 +26,6 @@
 ## Example and manual rule
 - Shared example data should live under `docs/examples` and be suitable for both documentation and tests.
 - Each example folder should include a `README.md` explaining what the example demonstrates.
+- Intentionally invalid examples are part of the supported documentation strategy and should explain what is wrong, why it fails, and how to fix it.
 - GitHub-ready DLL documentation belongs under `docs/manual/dll`.
 - GitHub-ready editor documentation belongs under `docs/manual/editor`.

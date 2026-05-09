@@ -10,6 +10,7 @@
 - GitHub-ready DLL documentation should live under `docs/manual/dll`.
 - Editor documentation should be located under `docs/manual/editor`.
 - Shared example data should be stored under `docs/examples`, starting with `docs/examples/1_simple_singlefile/user.rec` to be used both in documentation and tests. Tests using shared examples should hide file structure behind wrappers, such as enums for example directories/scenarios, to improve readability and maintainability.
+- Malformed example cases should live under `docs/examples` using folders named like `<no>_wrong_<whats_wrong>`, and each should clearly explain that the example is intentionally invalid, why it fails, and how to fix it.
 
 ## Domain Model Guidelines
 - Prefer immutable C# record-based domain model types for record document structures where practical. User prefers record class over struct for now; structs should only be used later for truly performance-critical parts with massive array-based operations on complex data structures.

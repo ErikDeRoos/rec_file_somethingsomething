@@ -8,8 +8,14 @@
 - Preserve enough source structure to support stable save behavior where practical.
 - Add functionality incrementally: core fields and descriptors first, advanced syntax later.
 - Use shared example files from `docs/examples` to validate realistic parsing behavior.
+- Use intentionally invalid examples to define parser-versus-validator boundaries.
 - Isolate Windows-specific assumptions from parser logic.
 - Mark any parser behavior that may complicate future Linux or Unix portability.
+
+## Predictable model behavior
+- Prefer immutable record-based domain model types for parsed runtime data.
+- If mutation is needed during parsing or serialization setup, use separate builder types as the allowed mutable staging area.
+- Keep mutation localized to builders and emit immutable runtime objects once parsing completes.
 
 ## Memory allocation practices
 - Prefer simple and maintainable implementations first, then optimize when profiling shows it matters.
