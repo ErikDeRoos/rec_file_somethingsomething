@@ -4,35 +4,84 @@ using System.Runtime.InteropServices;
 namespace rec_file_lib.DirectFileServer;
 
 [ComVisible(true)]
-[Guid(ContractGuids.DirectFileServer_RecSelOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelOptions
+[Guid(ContractGuids.DirectFileServer_IRecSelOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelOptions
 {
-    public RecSelTypeOptions Type { get; set; } = new();
+    IRecSelTypeOptions Type { get; set; }
 
-    public RecSelSelectOptions Select { get; set; } = new();
+    IRecSelSelectOptions Select { get; set; }
 
-    public RecSelProjectOptions Project { get; set; } = new();
+    IRecSelProjectOptions Project { get; set; }
 
-    public RecSelGroupOptions Group { get; set; } = new();
+    IRecSelGroupOptions Group { get; set; }
 
-    public RecSelAggregateOptions Aggregate { get; set; } = new();
+    IRecSelAggregateOptions Aggregate { get; set; }
 
-    public RecSelSortOptions Sort { get; set; } = new();
+    IRecSelSortOptions Sort { get; set; }
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecSelOptions)]
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelOptions))]
+public class RecSelOptions : IRecSelOptions
+{
+    public IRecSelTypeOptions Type { get; set; } = new RecSelTypeOptions();
+
+    public IRecSelSelectOptions Select { get; set; } = new RecSelSelectOptions();
+
+    public IRecSelProjectOptions Project { get; set; } = new RecSelProjectOptions();
+
+    public IRecSelGroupOptions Group { get; set; } = new RecSelGroupOptions();
+
+    public IRecSelAggregateOptions Aggregate { get; set; } = new RecSelAggregateOptions();
+
+    public IRecSelSortOptions Sort { get; set; } = new RecSelSortOptions();
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelTypeOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelTypeOptions
+{
+    string RecordType { get; set; }
 }
 
 [ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelTypeOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelTypeOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelTypeOptions))]
+public class RecSelTypeOptions : IRecSelTypeOptions
 {
     public string RecordType { get; set; } = string.Empty;
 }
 
 [ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelSelectOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelSelectOptions
+{
+    string Indexes { get; set; }
+
+    string Quick { get; set; }
+
+    string Expression { get; set; }
+
+    string JoinField { get; set; }
+
+    bool Collapse { get; set; }
+
+    bool Uniq { get; set; }
+
+    bool IncludeDescriptors { get; set; }
+}
+
+[ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelSelectOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelSelectOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelSelectOptions))]
+public class RecSelSelectOptions : IRecSelSelectOptions
 {
     public string Indexes { get; set; } = string.Empty;
 
@@ -50,25 +99,54 @@ public class RecSelSelectOptions
 }
 
 [ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelProjectOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelProjectOptions
+{
+    string[] FieldNames { get; set; }
+}
+
+[ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelProjectOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelProjectOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelProjectOptions))]
+public class RecSelProjectOptions : IRecSelProjectOptions
 {
     public string[] FieldNames { get; set; } = Array.Empty<string>();
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelGroupOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelGroupOptions
+{
+    string[] FieldNames { get; set; }
 }
 
 [ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelGroupOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelGroupOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelGroupOptions))]
+public class RecSelGroupOptions : IRecSelGroupOptions
 {
     public string[] FieldNames { get; set; } = Array.Empty<string>();
 }
 
 [ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelAggregateOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelAggregateOptions
+{
+    bool Count { get; set; }
+
+    string CountFieldName { get; set; }
+}
+
+[ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelAggregateOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelAggregateOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelAggregateOptions))]
+public class RecSelAggregateOptions : IRecSelAggregateOptions
 {
     public bool Count { get; set; }
 
@@ -76,9 +154,18 @@ public class RecSelAggregateOptions
 }
 
 [ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_IRecSelSortOptions)]
+[InterfaceType(ComInterfaceType.InterfaceIsDual)]
+public interface IRecSelSortOptions
+{
+    string[] FieldNames { get; set; }
+}
+
+[ComVisible(true)]
 [Guid(ContractGuids.DirectFileServer_RecSelSortOptions)]
-[ClassInterface(ClassInterfaceType.AutoDual)]
-public class RecSelSortOptions
+[ClassInterface(ClassInterfaceType.None)]
+[ComDefaultInterface(typeof(IRecSelSortOptions))]
+public class RecSelSortOptions : IRecSelSortOptions
 {
     public string[] FieldNames { get; set; } = Array.Empty<string>();
 }

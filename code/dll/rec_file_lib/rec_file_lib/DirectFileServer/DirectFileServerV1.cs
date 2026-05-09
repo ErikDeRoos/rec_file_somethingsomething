@@ -15,7 +15,7 @@ namespace rec_file_lib.DirectFileServer
         private readonly DirectRecMutationParser _mutationParser = new();
         private readonly RecSelectionQueryEngine _selectionQueryEngine = new();
 
-        public string RecSel(string filePath, RecSelOptions? options)
+        public string RecSel(string filePath, IRecSelOptions? options)
         {
             _documentStore.LoadFromFile(filePath);
 
