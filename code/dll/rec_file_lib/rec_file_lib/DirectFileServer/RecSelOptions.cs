@@ -41,6 +41,8 @@ public class RecSelSelectOptions
     public string Expression { get; set; } = string.Empty;
 
     public string JoinField { get; set; } = string.Empty;
+
+    public bool Collapse { get; set; }
 }
 
 [ComVisible(true)]

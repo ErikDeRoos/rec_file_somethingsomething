@@ -5,7 +5,7 @@ namespace rec_file_lib.DirectFileServer;
 
 internal sealed class DirectRecSelFormatter
 {
-    public string FormatSelection(RecFileDocument document)
+    public string FormatSelection(RecFileDocument document, bool collapse = false)
     {
         ArgumentNullException.ThrowIfNull(document);
 
@@ -19,10 +19,10 @@ internal sealed class DirectRecSelFormatter
             throw new InvalidOperationException("several record types found. Please use -t to specify one.");
         }
 
-        return FormatRecordSet(document.RecordSets[0]);
+        return FormatRecordSet(document.RecordSets[0], collapse);
     }
 
-    public string FormatRecordSet(RecRecordSet? recordSet)
+    public string FormatRecordSet(RecRecordSet? recordSet, bool collapse = false)
     {
         if (recordSet is null)
         {
@@ -30,15 +30,15 @@ internal sealed class DirectRecSelFormatter
         }
 
         using var writer = new StringWriter();
-        WriteRecordSetRecords(writer, recordSet);
+        WriteRecordSetRecords(writer, recordSet, collapse);
         return writer.ToString().TrimEnd('\r', '\n');
     }
 
-    private static void WriteRecordSetRecords(TextWriter writer, RecRecordSet recordSet)
+    private static void WriteRecordSetRecords(TextWriter writer, RecRecordSet recordSet, bool collapse)
     {
         for (var recordIndex = 0; recordIndex < recordSet.Records.Count; recordIndex++)
         {
-            if (recordIndex > 0)
+            if (!collapse && recordIndex > 0)
             {
                 writer.WriteLine();
             }

@@ -1028,6 +1028,73 @@ public sealed class DirectFileServerV1Tests
             NormalizeForComparison(output));
     }
 
+    [Fact]
+    public void RecSel_SimpleRecutilsBookExample_WithCollapse_EmitsRecordsWithoutBlankSeparators()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Book" },
+                Select = new RecSelSelectOptions { Collapse = true }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Title: GNU Emacs Manual
+                Author: Richard M. Stallman
+                Publisher: FSF
+                Location: home
+                Title: The Colour of Magic
+                Author: Terry Pratchett
+                Location: loaned
+                Title: Mio Cid
+                Author: Anonymous
+                Location: home
+                Title: chapters.gnu.org administration guide
+                Author: Nacho Gonzalez
+                Author: Jose E. Marchesi
+                Location: unknown
+                Title: Yeelong User Manual
+                Location: home
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndSortBySingleField_WithCollapse_SortsAndCollapsesOutput()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { Collapse = true },
+                Sort = new RecSelSortOptions { FieldNames = ["Name"] }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+                Abode: 42AbbeterWay
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+                """),
+            NormalizeForComparison(output));
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

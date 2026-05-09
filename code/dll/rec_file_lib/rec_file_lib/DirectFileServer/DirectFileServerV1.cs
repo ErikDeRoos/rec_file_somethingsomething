@@ -19,10 +19,11 @@ namespace rec_file_lib.DirectFileServer
         {
             _documentStore.LoadFromFile(filePath);
 
+            var collapse = options?.Select?.Collapse ?? false;
             var recordType = options?.Type?.RecordType;
             if (string.IsNullOrEmpty(recordType))
             {
-                return _recSelFormatter.FormatSelection(_documentStore.GetDocument());
+                return _recSelFormatter.FormatSelection(_documentStore.GetDocument(), collapse);
             }
 
             var document = _documentStore.GetDocument();
@@ -42,7 +43,7 @@ namespace rec_file_lib.DirectFileServer
                 _documentStore.FindRecordSet(recordType),
                 queryOptions);
 
-            return _recSelFormatter.FormatRecordSet(selectedRecordSet);
+            return _recSelFormatter.FormatRecordSet(selectedRecordSet, collapse);
         }
 
         public string RecInsType(string filePath, string recordType, string recordText)
