@@ -46,11 +46,11 @@ internal sealed class DirectFileServerDocumentStore
             .ToArray();
     }
 
-    public int GetRecordCount(string recordSetType)
+    public int GetRecordCount(string recordType)
     {
-        ArgumentNullException.ThrowIfNull(recordSetType);
+        ArgumentNullException.ThrowIfNull(recordType);
 
-        return FindRecordSet(recordSetType)?.Records.Count ?? 0;
+        return FindRecordSet(recordType)?.Records.Count ?? 0;
     }
 
     public RecFileDocument GetDocument()
@@ -58,29 +58,29 @@ internal sealed class DirectFileServerDocumentStore
         return _document;
     }
 
-    public RecRecordSet? FindRecordSet(string recordSetType)
+    public RecRecordSet? FindRecordSet(string recordType)
     {
-        ArgumentNullException.ThrowIfNull(recordSetType);
+        ArgumentNullException.ThrowIfNull(recordType);
 
-        if (recordSetType.Length == 0)
+        if (recordType.Length == 0)
         {
             return _document.RecordSets
                 .FirstOrDefault(recordSet => string.IsNullOrEmpty(recordSet.TypeName));
         }
 
         return _document.RecordSets
-            .FirstOrDefault(recordSet => string.Equals(recordSet.TypeName, recordSetType, StringComparison.Ordinal));
+            .FirstOrDefault(recordSet => string.Equals(recordSet.TypeName, recordType, StringComparison.Ordinal));
     }
 
-    public RecRecordSet InsertRecord(string recordSetType, RecRecord record)
+    public RecRecordSet InsertRecord(string recordType, RecRecord record)
     {
-        ArgumentNullException.ThrowIfNull(recordSetType);
+        ArgumentNullException.ThrowIfNull(recordType);
         ArgumentNullException.ThrowIfNull(record);
 
-        var recordSet = FindRecordSet(recordSetType);
+        var recordSet = FindRecordSet(recordType);
         if (recordSet is null)
         {
-            throw new InvalidOperationException($"record set '{recordSetType}' not found.");
+            throw new InvalidOperationException($"record set '{recordType}' not found.");
         }
 
         var updatedRecordSets = _document.RecordSets
@@ -93,6 +93,29 @@ internal sealed class DirectFileServerDocumentStore
         _validator.EnsureValid(updatedDocument);
         _document = updatedDocument;
 
-        return FindRecordSet(recordSetType)!;
+        return FindRecordSet(recordType)!;
+    }
+
+    public RecRecordSet DeleteRecords(string recordType)
+    {
+        ArgumentNullException.ThrowIfNull(recordType);
+
+        var recordSet = FindRecordSet(recordType);
+        if (recordSet is null)
+        {
+            throw new InvalidOperationException($"record set '{recordType}' not found.");
+        }
+
+        var updatedRecordSets = _document.RecordSets
+            .Select(existingRecordSet => ReferenceEquals(existingRecordSet, recordSet)
+                ? existingRecordSet with { Records = Array.Empty<RecRecord>() }
+                : existingRecordSet)
+            .ToArray();
+
+        var updatedDocument = _document with { RecordSets = updatedRecordSets };
+        _validator.EnsureValid(updatedDocument);
+        _document = updatedDocument;
+
+        return FindRecordSet(recordType)!;
     }
 }

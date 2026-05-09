@@ -193,6 +193,28 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
+    public void RecInsType_SimpleRecutilsBookExample_PersistsInsertionAcrossServerInstances()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var insertingServer = new DirectFileServerV1();
+
+        insertingServer.RecInsType(
+            workingCopy.FilePath,
+            "Book",
+            """
+            Title: Domain-Driven Design
+            Author: Eric Evans
+            Location: home
+            """);
+
+        var reloadedServer = new DirectFileServerV1();
+        var output = reloadedServer.RecSelType(workingCopy.FilePath, "Book");
+
+        Assert.Contains("Title: Domain-Driven Design", output, StringComparison.Ordinal);
+        Assert.Contains("Author: Eric Evans", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RecInsType_MultipleRecordTypesSingleFile_AppendsOnlyTheRequestedRecordType()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
@@ -215,6 +237,97 @@ public sealed class DirectFileServerV1Tests
 
         Assert.Contains("Id: NewPlace", residences, StringComparison.Ordinal);
         Assert.DoesNotContain("Id: NewPlace", people, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecDelType_SimpleRecutilsBookExample_RemovesAllBookRecordsButKeepsDescriptor()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecDelType(workingCopy.FilePath, "Book");
+
+        Assert.Equal(string.Empty, output);
+        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Book"));
+        var fileContents = File.ReadAllText(workingCopy.FilePath);
+        Assert.Contains("%rec: Book", fileContents, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecDelType_SimpleRecutilsBookExample_PersistsDeletionAcrossServerInstances()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
+        var deletingServer = new DirectFileServerV1();
+
+        deletingServer.RecDelType(workingCopy.FilePath, "Book");
+
+        var reloadedServer = new DirectFileServerV1();
+        var output = reloadedServer.RecSelType(workingCopy.FilePath, "Book");
+
+        Assert.Equal(string.Empty, output);
+        var fileContents = File.ReadAllText(workingCopy.FilePath);
+        Assert.Contains("%rec: Book", fileContents, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecDelType_MultipleRecordTypesSingleFile_WithPerson_RemovesOnlyPersonRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecDelType(workingCopy.FilePath, "Person");
+
+        Assert.Equal(string.Empty, output);
+        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Person"));
+        var residences = server.RecSelType(workingCopy.FilePath, "Residence");
+        Assert.Contains("Id: 42AbbeterWay", residences, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecDelType_MultipleRecordTypesSingleFile_WithResidence_ThrowsValidationErrorBecausePersonsReferenceIt()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecDelType(workingCopy.FilePath, "Residence"));
+
+        Assert.Contains("references unknown key '42AbbeterWay'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecDelType_WrongMissingMandatoryField_RemovesOffendingRecordsAndCanRecoverTheFile()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongMissingMandatoryField);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecDelType(workingCopy.FilePath, "User");
+
+        Assert.Equal(string.Empty, output);
+        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "User"));
+    }
+
+    [Fact]
+    public void RecDelType_WrongDuplicateKeyValue_RemovesOffendingRecordsAndCanRecoverTheFile()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongDuplicateKeyValue);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecDelType(workingCopy.FilePath, "Item");
+
+        Assert.Equal(string.Empty, output);
+        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Item"));
+    }
+
+    [Fact]
+    public void RecDelType_WrongInvalidFieldType_RemovesOffendingRecordsAndCanRecoverTheFile()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongInvalidFieldType);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecDelType(workingCopy.FilePath, "Task");
+
+        Assert.Equal(string.Empty, output);
+        Assert.Equal(string.Empty, server.RecSelType(workingCopy.FilePath, "Task"));
     }
 
     [Fact]
@@ -297,6 +410,28 @@ public sealed class DirectFileServerV1Tests
             Name: Added thing
             Id: 1
             """));
+
+        Assert.Equal("Invalid field line: %key Id", exception.Message);
+    }
+
+    [Fact]
+    public void RecDelType_WrongBadMultilineContinuation_ThrowsDuringInitialLoad()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongBadMultilineContinuation);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() => server.RecDelType(workingCopy.FilePath, "Note"));
+
+        Assert.Equal("Continuation line found without a current field.", exception.Message);
+    }
+
+    [Fact]
+    public void RecDelType_WrongMissingFieldSeparator_ThrowsDuringInitialLoad()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongMissingFieldSeparator);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() => server.RecDelType(workingCopy.FilePath, "Article"));
 
         Assert.Equal("Invalid field line: %key Id", exception.Message);
     }

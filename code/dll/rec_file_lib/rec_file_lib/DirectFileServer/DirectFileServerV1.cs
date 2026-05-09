@@ -37,5 +37,15 @@ namespace rec_file_lib.DirectFileServer
             _documentStore.SaveToFile(filePath);
             return _recSelFormatter.FormatRecordSet(updatedRecordSet);
         }
+
+        public string RecDelType(string filePath, string recordType)
+        {
+            ArgumentNullException.ThrowIfNull(recordType);
+
+            _documentStore.LoadFromFile(filePath);
+            var updatedRecordSet = _documentStore.DeleteRecords(recordType);
+            _documentStore.SaveToFile(filePath);
+            return _recSelFormatter.FormatRecordSet(updatedRecordSet);
+        }
     }
 }
