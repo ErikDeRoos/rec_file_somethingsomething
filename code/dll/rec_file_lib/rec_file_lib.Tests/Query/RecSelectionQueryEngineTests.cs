@@ -137,6 +137,46 @@ public sealed class RecSelectionQueryEngineTests
     }
 
     [Fact]
+    public void Select_WithGroupByFieldAndCount_GroupsRecordsAndAddsCount()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var personRecordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            personRecordSet,
+            CreateOptions(
+                GroupByFields: ["Abode"],
+                Count: true,
+                CountFieldName: "Total"));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("42AbbeterWay", GetFieldValue(result.Records[0], "Abode"));
+        Assert.Equal("2", GetFieldValue(result.Records[0], "Total"));
+        Assert.Equal("ChezGrampa", GetFieldValue(result.Records[1], "Abode"));
+        Assert.Equal("1", GetFieldValue(result.Records[1], "Total"));
+    }
+
+    [Fact]
+    public void Select_WithCountOnly_ReturnsSingleCountRecord()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var personRecordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            personRecordSet,
+            CreateOptions(Count: true, CountFieldName: "Count"));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal("3", GetFieldValue(result.Records[0], "Count"));
+    }
+
+    [Fact]
     public void Select_WithJoinFieldNotDeclaredAsRecType_ThrowsInvalidOperationException()
     {
         var engine = new RecSelectionQueryEngine();
@@ -299,9 +339,20 @@ public sealed class RecSelectionQueryEngineTests
         IReadOnlySet<int>? SelectedIndexes = null,
         string? QuickFilter = null,
         string? Expression = null,
-        string? JoinField = null)
+        string? JoinField = null,
+        IReadOnlyList<string>? GroupByFields = null,
+        bool Count = false,
+        string CountFieldName = "Count")
     {
-        return new RecSelectionQueryOptions(ProjectedFields, SelectedIndexes, QuickFilter, Expression, JoinField);
+        return new RecSelectionQueryOptions(
+            ProjectedFields,
+            SelectedIndexes,
+            QuickFilter,
+            Expression,
+            JoinField,
+            GroupByFields,
+            Count,
+            CountFieldName);
     }
 
     private static RecFileDocument CreatePeopleAndResidencesDocument()

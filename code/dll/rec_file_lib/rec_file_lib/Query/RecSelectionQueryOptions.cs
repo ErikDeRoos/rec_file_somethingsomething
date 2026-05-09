@@ -7,4 +7,7 @@ internal sealed record class RecSelectionQueryOptions(
     IReadOnlySet<int>? SelectedIndexes,
     string? QuickFilter,
     string? Expression,
-    string? JoinField);
+    string? JoinField,
+    IReadOnlyList<string>? GroupByFields,
+    bool Count,
+    string CountFieldName);

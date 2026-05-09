@@ -13,6 +13,10 @@ public class RecSelOptions
     public RecSelSelectOptions Select { get; set; } = new();
 
     public RecSelProjectOptions Project { get; set; } = new();
+
+    public RecSelGroupOptions Group { get; set; } = new();
+
+    public RecSelAggregateOptions Aggregate { get; set; } = new();
 }
 
 [ComVisible(true)]
@@ -43,4 +47,22 @@ public class RecSelSelectOptions
 public class RecSelProjectOptions
 {
     public string[] FieldNames { get; set; } = Array.Empty<string>();
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecSelGroupOptions)]
+[ClassInterface(ClassInterfaceType.AutoDual)]
+public class RecSelGroupOptions
+{
+    public string[] FieldNames { get; set; } = Array.Empty<string>();
+}
+
+[ComVisible(true)]
+[Guid(ContractGuids.DirectFileServer_RecSelAggregateOptions)]
+[ClassInterface(ClassInterfaceType.AutoDual)]
+public class RecSelAggregateOptions
+{
+    public bool Count { get; set; }
+
+    public string CountFieldName { get; set; } = "Count";
 }

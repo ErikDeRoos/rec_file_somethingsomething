@@ -16,7 +16,7 @@ internal sealed class RecSelectionQueryEngine
 
         var expression = RecSelectionExpressionParser.Parse(options.Expression);
         var sourceRecordSet = ApplyJoinIfRequested(document, recordSet, options.JoinField);
-        var selectedRecords = new List<RecRecord>();
+        var filteredRecords = new List<RecRecord>();
 
         for (var recordIndex = 0; recordIndex < sourceRecordSet.Records.Count; recordIndex++)
         {
@@ -36,10 +36,78 @@ internal sealed class RecSelectionQueryEngine
                 continue;
             }
 
-            selectedRecords.Add(ProjectRecord(record, options.ProjectedFields));
+            filteredRecords.Add(record);
         }
 
-        return sourceRecordSet with { Records = selectedRecords.ToArray() };
+        var groupedRecords = ApplyGroupingAndCount(filteredRecords, options.GroupByFields, options.Count, options.CountFieldName);
+
+        var projectedRecords = groupedRecords
+            .Select(record => ProjectRecord(record, options.ProjectedFields))
+            .ToArray();
+
+        return sourceRecordSet with { Records = projectedRecords };
+    }
+
+    private static IReadOnlyList<RecRecord> ApplyGroupingAndCount(
+        IReadOnlyList<RecRecord> records,
+        IReadOnlyList<string>? groupByFields,
+        bool count,
+        string countFieldName)
+    {
+        if (groupByFields is null || groupByFields.Count == 0)
+        {
+            if (!count)
+            {
+                return records;
+            }
+
+            var singleCountRecord = new RecRecord([
+                new RecField(countFieldName, records.Count.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            ]);
+            return [singleCountRecord];
+        }
+
+        var groups = new Dictionary<string, List<RecRecord>>(StringComparer.Ordinal);
+        var groupValuesByKey = new Dictionary<string, string[]>(StringComparer.Ordinal);
+
+        foreach (var record in records)
+        {
+            var values = groupByFields
+                .Select(fieldName => TryGetFieldValue(record, fieldName) ?? string.Empty)
+                .ToArray();
+
+            var key = string.Join("\u001F", values);
+            if (!groups.TryGetValue(key, out var bucket))
+            {
+                bucket = [];
+                groups[key] = bucket;
+                groupValuesByKey[key] = values;
+            }
+
+            bucket.Add(record);
+        }
+
+        var grouped = new List<RecRecord>(groups.Count);
+        foreach (var key in groups.Keys)
+        {
+            var values = groupValuesByKey[key];
+            var bucket = groups[key];
+
+            var fields = new List<RecField>(groupByFields.Count + (count ? 1 : 0));
+            for (var index = 0; index < groupByFields.Count; index++)
+            {
+                fields.Add(new RecField(groupByFields[index], values[index]));
+            }
+
+            if (count)
+            {
+                fields.Add(new RecField(countFieldName, bucket.Count.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            }
+
+            grouped.Add(new RecRecord(fields.ToArray()));
+        }
+
+        return grouped;
     }
 
     private static RecRecordSet ApplyJoinIfRequested(RecFileDocument document, RecRecordSet sourceRecordSet, string? joinField)

@@ -892,6 +892,83 @@ public sealed class DirectFileServerV1Tests
         Assert.Equal("join field 'Name' is not declared with a rec type.", exception.Message);
     }
 
+    [Fact]
+    public void RecSel_WithTypeGroupByAndCount_ReturnsGroupedCounts()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Group = new RecSelGroupOptions { FieldNames = ["Abode"] },
+                Aggregate = new RecSelAggregateOptions { Count = true, CountFieldName = "Total" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Abode: 42AbbeterWay
+                Total: 2
+
+                Abode: ChezGrampa
+                Total: 1
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithTypeAndCountOnly_ReturnsSingleCountRecord()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Aggregate = new RecSelAggregateOptions { Count = true, CountFieldName = "Count" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Count: 3
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSel_WithJoinGroupByAndCount_CanGroupOnJoinedFields()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Person" },
+                Select = new RecSelSelectOptions { JoinField = "Abode" },
+                Group = new RecSelGroupOptions { FieldNames = ["Residence.Address"] },
+                Aggregate = new RecSelAggregateOptions { Count = true, CountFieldName = "Total" }
+            });
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Residence.Address: 42 Abbeter Way, Inprooving, WORCS
+                Total: 2
+
+                Residence.Address: 1 Wanter Rise, Greater Inncombe, BUCKS
+                Total: 1
+                """),
+            NormalizeForComparison(output));
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

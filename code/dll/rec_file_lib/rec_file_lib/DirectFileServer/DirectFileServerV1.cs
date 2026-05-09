@@ -31,7 +31,10 @@ namespace rec_file_lib.DirectFileServer
                 SelectedIndexes: ParseSelectedIndexes(options?.Select?.Indexes),
                 QuickFilter: ParseQuickFilter(options?.Select?.Quick),
                 Expression: ParseExpression(options?.Select?.Expression),
-                JoinField: ParseJoinField(options?.Select?.JoinField));
+                JoinField: ParseJoinField(options?.Select?.JoinField),
+                GroupByFields: ParseGroupByFields(options?.Group?.FieldNames),
+                Count: options?.Aggregate?.Count ?? false,
+                CountFieldName: ParseCountFieldName(options?.Aggregate?.CountFieldName));
 
             var selectedRecordSet = _selectionQueryEngine.Select(
                 document,
@@ -151,6 +154,31 @@ namespace rec_file_lib.DirectFileServer
             }
 
             return joinField.Trim();
+        }
+
+        private static IReadOnlyList<string>? ParseGroupByFields(string[]? fieldNames)
+        {
+            if (fieldNames is null || fieldNames.Length == 0)
+            {
+                return null;
+            }
+
+            var normalized = fieldNames
+                .Where(static name => !string.IsNullOrWhiteSpace(name))
+                .Select(static name => name.Trim())
+                .ToArray();
+
+            return normalized.Length == 0 ? null : normalized;
+        }
+
+        private static string ParseCountFieldName(string? countFieldName)
+        {
+            if (string.IsNullOrWhiteSpace(countFieldName))
+            {
+                return "Count";
+            }
+
+            return countFieldName.Trim();
         }
     }
 }
