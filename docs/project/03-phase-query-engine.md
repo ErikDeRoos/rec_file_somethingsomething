@@ -11,6 +11,14 @@ Expand the shared engine so both direct and SQL-like surfaces can rely on the sa
 - Grouping and aggregate groundwork
 - Auto-generated field groundwork for `%auto`
 
+## Current implemented subset
+- Shared query layer introduced under `rec_file_lib.Query`
+- Selection query options model used by DirectFileServer:
+  - index selection (`-n` style)
+  - quick substring filtering (`-q` style)
+  - projection (`-p` style)
+- Dedicated unit tests for query logic combinations and edge cases
+
 ## Priority order
 1. Type selection
 2. Index selection
@@ -24,8 +32,10 @@ Expand the shared engine so both direct and SQL-like surfaces can rely on the sa
 - Start with the subset needed by `DirectFileServerV1`
 - Reuse the exact same engine later in `SqlFileServerV1`
 - Prefer incremental compatibility over a huge parser upfront
+- Keep formatting concerns separated from query execution concerns
 - Use shared examples from `docs/examples` to validate realistic behavior as features are added
 
 ## Exit criteria
 - Shared query engine supports the direct API sufficiently
 - SQL-like surface can map onto the same operations
+- Query behavior has focused unit coverage for logic combinations and edge cases

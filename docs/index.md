@@ -18,13 +18,13 @@ Project planning and phased delivery tracking.
 - `docs/project/01-phase-foundation.md`  
   Foundation phase scope: model, parser, serializer, validation groundwork, and example-driven first milestone.
 - `docs/project/02-phase-direct-file-server-v1.md`  
-  Phase plan for the recutils-inspired direct API and COM-facing direct server.
+  Phase plan and current status for the COM-facing direct API, including options-based `RecSel(filePath, options)` selection behavior.
 - `docs/project/03-phase-query-engine.md`  
-  Query-engine expansion plan: selection, projection, joins, sorting, and aggregates groundwork.
+  Query-engine expansion plan and current implemented subset (index selection, quick filtering, and projection in shared query layer).
 - `docs/project/04-phase-sql-file-server-v1.md`  
   Phase plan for the SQL-like façade and session/metadata behavior.
 - `docs/project/05-com-and-unity-notes.md`  
-  Notes about COM exposure, Unity integration, result formats, documentation/manual placement, and versioning direction.
+  Notes about COM exposure, Unity integration, options-based contract shaping, result formats, documentation/manual placement, and versioning direction.
 
 ### `docs/architecture/`
 Architecture notes and long-lived engineering guidance.

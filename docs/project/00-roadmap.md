@@ -47,7 +47,9 @@
 - Stream-capable parser and serializer are implemented
 - Shared example scenario wrappers are in place for tests
 - Valid and malformed example sets are both part of the workflow
-- The first tool-shaped `DirectFileServerV1` API is in place with `RecSel`, `RecSelType`, and `RecInsType`
+- `DirectFileServerV1` now uses an options-based selection API: `RecSel(filePath, options)`
+- Selection options are grouped as type/select/project with support for index and quick substring selection
+- A dedicated internal query layer is introduced (`rec_file_lib.Query`) and used by `DirectFileServerV1`
 
 ## Current examples
 ### Valid examples
@@ -70,10 +72,13 @@
 - Round-trip valid examples through parser and serializer
 - Parse malformed semantic examples for later validation
 - Fail early on malformed syntactical examples
-- Provide initial tool-shaped direct selection methods over the current foundation
+- Provide options-based direct selection through `RecSel(filePath, options)`
+- Provide type selection, index selection, projection, and quick substring filtering in direct selection
 - Provide initial typed record insertion with validation-aware file updates
+- Provide query-layer unit coverage for selection/projection/filter combinations
 
 ## Next likely deliverables
 - Expand validation logic for semantic-invalid examples
+- Add expression-based selection into the shared query layer
+- Extend query engine capabilities (sorting, join expansion, grouping groundwork)
 - Evolve DirectFileServer result access toward structured cursor or reader-style patterns
-- Add the next small recutils-style direct mutation or selection operation only after the result-shape direction stays coherent

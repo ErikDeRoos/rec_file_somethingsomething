@@ -11,12 +11,14 @@ Prefer:
 - `int`
 - `bool`
 - `string[]`
+- COM-visible option classes composed of these primitive-friendly members
 
 Avoid exposing:
 - generic collections
-- nested object graphs
 - internal model types
 - implementation-specific parser/query objects
+
+Nested option object graphs should stay shallow and purpose-specific.
 
 ## Result format guidance
 For complex outputs, prefer a long-term direction based on:
@@ -24,7 +26,7 @@ For complex outputs, prefer a long-term direction based on:
 - cursor or reader-style iteration
 - compatibility formatting layered on top when needed
 
-For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior for methods such as `RecSel`, `RecSelType`, and `RecInsType`.
+For now, plain text output can still be used as a temporary compatibility layer where that helps mirror recutils behavior for methods such as `RecSel(filePath, options)`, `RecInsType`, and `RecDelType`.
 
 ## Registration and packaging
 - Keep the production output centered on the single `rec_file_lib` assembly
@@ -39,6 +41,6 @@ For now, plain text output can still be used as a temporary compatibility layer 
 - Each example folder should include its own `README.md` explaining purpose and scope
 
 ## Versioning
-- `DirectFileServerV1` remains stable even as internal namespaces evolve
+- `DirectFileServerV1` remains pre-release and may evolve directly while not yet field-deployed
 - `SqlFileServerV1` grows incrementally behind a stable COM boundary
 - Future result-shape changes that are not backward compatible should be versioned deliberately
