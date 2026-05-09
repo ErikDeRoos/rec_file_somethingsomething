@@ -9,7 +9,7 @@ This document defines the currently supported `RecSel(filePath, options)` subset
 | `-t` type | `options.Type.RecordType` | Yes |
 | `-n` number/indexes | `options.Select.Indexes` | Yes |
 | `-q` quick substring | `options.Select.Quick` | Yes |
-| `-e` expression | `options.Select.Expression` | Partial (`=`, `!=`, `~`, `&&`, `||`, `!`, parentheses) |
+| `-e` expression | `options.Select.Expression` | Partial (`=`, `!=`, `~`, `<`, `<=`, `>`, `>=`, `&&`, `||`, `!`, parentheses) |
 | `-j` join | `options.Select.JoinField` | Yes (inner join) |
 | `-p` print fields | `options.Project.FieldNames` | Yes |
 | `-G` group by | `options.Group.FieldNames` | Groundwork |
@@ -22,12 +22,16 @@ This document defines the currently supported `RecSel(filePath, options)` subset
 ## Expression subset details
 
 Supported now:
-- comparisons: `Field = Value`, `Field != Value`, `Field ~ Value`
+- comparisons: `Field = Value`, `Field != Value`, `Field ~ Value`, `Field < Value`, `Field <= Value`, `Field > Value`, `Field >= Value`
 - boolean composition: `expr1 && expr2`, `expr1 || expr2`, `!expr`
 - explicit grouping: `(expr)`
+- comparison mode:
+  - numeric-aware comparison when both operands are scalar-compatible numerics (including decimal, hex `0x`, octal leading `0`, optional sign)
+  - ordinal string comparison fallback otherwise
 
 Still not supported:
-- numeric/date comparisons (`<`, `<=`, `>`, `>=`, `==`)
+- recutils `==` operator semantics
+- date-aware comparison semantics
 - arithmetic operators and ternary operator
 - field counter operator (`#Field`)
 - full recutils backtracking semantics across repeated fields

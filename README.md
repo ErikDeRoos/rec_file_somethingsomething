@@ -17,6 +17,9 @@ C# rec file reader/manipulation library with a COM-facing API and a growing recu
 - indexes (`-n` style)
 - quick substring (`-q` style)
 - expression subset (`-e` subset)
+  - `=`, `!=`, `~`, `<`, `<=`, `>`, `>=`
+  - `&&`, `||`, `!`, and parentheses
+  - numeric-aware scalar comparisons with ordinal string fallback
 - join (`-j` style)
 - projection (`-p` style)
 - grouping + count groundwork (`-G` + count)
@@ -24,6 +27,12 @@ C# rec file reader/manipulation library with a COM-facing API and a growing recu
 - uniq (`-U` style)
 - collapse (`-C` style)
 - include descriptors (`-d` style)
+
+## Current mutation and typed contracts
+`DirectFileServerV1` currently exposes:
+- `RecSel(...)` and `RecSel_Typed(...)`
+- `RecIns(...)` and `RecIns_Typed(...)`
+- `RecDel(...)` and `RecDel_Typed(...)`
 
 ## Compatibility notes
 This project currently implements a **documented supported subset** of recutils-like behavior, not full parity yet.
