@@ -436,6 +436,79 @@ public sealed class DirectFileServerV1Tests
         Assert.Equal("Invalid field line: %key Id", exception.Message);
     }
 
+    [Fact]
+    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithIndexes_ReturnsOnlyRequestedRecords()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", "1-2", null);
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Mandy Nebel
+                Email: mandy@example.com
+                Abode: 42AbbeterWay
+
+                Name: Ernest Wright
+                Abode: ChezGrampa
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithProjection_ReturnsOnlyProjectedFields()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", null, "Name,Email");
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+                Email: alf@example.com
+
+                Name: Mandy Nebel
+                Email: mandy@example.com
+
+                Name: Ernest Wright
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSelTypeSelect_MultipleRecordTypesSingleFile_WithIndexesAndProjection_AppliesBoth()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSelTypeSelect(workingCopy.FilePath, "Person", "0,2", "Name");
+
+        Assert.Equal(
+            NormalizeForComparison(
+                """
+                Name: Alfred Nebel
+
+                Name: Ernest Wright
+                """),
+            NormalizeForComparison(output));
+    }
+
+    [Fact]
+    public void RecSelTypeSelect_WithInvalidIndexRange_ThrowsFormatException()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.MultipleRecordTypesSingleFile);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<FormatException>(() =>
+            server.RecSelTypeSelect(workingCopy.FilePath, "Person", "2-1", "Name"));
+
+        Assert.Equal("Invalid record index range: '2-1'.", exception.Message);
+    }
+
     private static string NormalizeForComparison(string text)
     {
         return text.Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');

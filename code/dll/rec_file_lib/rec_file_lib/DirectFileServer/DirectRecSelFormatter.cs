@@ -24,33 +24,58 @@ internal sealed class DirectRecSelFormatter
 
     public string FormatRecordSet(RecRecordSet? recordSet)
     {
+        return FormatRecordSet(recordSet, projectedFields: null, selectedIndexes: null);
+    }
+
+    public string FormatRecordSet(
+        RecRecordSet? recordSet,
+        IReadOnlySet<string>? projectedFields,
+        IReadOnlySet<int>? selectedIndexes)
+    {
         if (recordSet is null)
         {
             return string.Empty;
         }
 
         using var writer = new StringWriter();
-        WriteRecordSetRecords(writer, recordSet);
+        WriteRecordSetRecords(writer, recordSet, projectedFields, selectedIndexes);
         return writer.ToString().TrimEnd('\r', '\n');
     }
 
-    private static void WriteRecordSetRecords(TextWriter writer, RecRecordSet recordSet)
+    private static void WriteRecordSetRecords(
+        TextWriter writer,
+        RecRecordSet recordSet,
+        IReadOnlySet<string>? projectedFields,
+        IReadOnlySet<int>? selectedIndexes)
     {
+        var hasWrittenRecord = false;
+
         for (var recordIndex = 0; recordIndex < recordSet.Records.Count; recordIndex++)
         {
-            if (recordIndex > 0)
+            if (selectedIndexes is not null && !selectedIndexes.Contains(recordIndex))
+            {
+                continue;
+            }
+
+            if (hasWrittenRecord)
             {
                 writer.WriteLine();
             }
 
-            WriteRecord(writer, recordSet.Records[recordIndex]);
+            WriteRecord(writer, recordSet.Records[recordIndex], projectedFields);
+            hasWrittenRecord = true;
         }
     }
 
-    private static void WriteRecord(TextWriter writer, RecRecord record)
+    private static void WriteRecord(TextWriter writer, RecRecord record, IReadOnlySet<string>? projectedFields)
     {
         foreach (var field in record.Fields)
         {
+            if (projectedFields is not null && !projectedFields.Contains(field.Name))
+            {
+                continue;
+            }
+
             WriteField(writer, field);
         }
     }

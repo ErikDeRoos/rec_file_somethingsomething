@@ -11,6 +11,8 @@ namespace rec_file_lib
 
         string RecSelType(string filePath, string recordType);
 
+        string RecSelTypeSelect(string filePath, string recordType, string indexes, string fields);
+
         string RecInsType(string filePath, string recordType, string recordText);
 
         string RecDelType(string filePath, string recordType);
