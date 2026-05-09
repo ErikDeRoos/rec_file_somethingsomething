@@ -13,3 +13,5 @@ Shared examples in this directory are used for two purposes at the same time:
 ## Current examples
 - `docs/examples/1_simple_singlefile/`
   - Minimal single-file example with a typed `User` record set, a comment header, and multiline field data.
+- `docs/examples/2_simple_recutils_book_example/`
+  - Recutils-inspired books example with descriptor fields, repeated fields, and multiple records.

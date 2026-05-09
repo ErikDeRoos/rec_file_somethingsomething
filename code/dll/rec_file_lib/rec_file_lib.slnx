@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="rec_file_lib.Tests/rec_file_lib.Tests.csproj" />
   <Project Path="rec_file_lib/rec_file_lib.csproj" />
 </Solution>

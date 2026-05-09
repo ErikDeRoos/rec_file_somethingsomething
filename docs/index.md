@@ -63,6 +63,10 @@ Shared example data used by documentation and tests.
   Explains the first example and what it is intended to validate.
 - `docs/examples/1_simple_singlefile/user.rec`  
   First tangible rec file used by both GitHub documentation and tests.
+- `docs/examples/2_simple_recutils_book_example/README.md`  
+  Explains the recutils-inspired books example and what it validates.
+- `docs/examples/2_simple_recutils_book_example/books.rec`  
+  Recutils-derived books example used by documentation and tests.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.
