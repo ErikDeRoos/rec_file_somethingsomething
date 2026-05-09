@@ -1,0 +1,5 @@
+%rec: Task
+%type: Priority int
+
+Title: Import legacy dump
+Priority: high

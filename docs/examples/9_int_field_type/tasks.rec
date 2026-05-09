@@ -1,0 +1,16 @@
+# int field type valid example
+
+%rec: Task
+%type: Priority int
+
+Title: Write design draft
+Priority: 1
+
+Title: Investigate parser perf
+Priority: -23
+
+Title: Prepare release notes
+Priority: 0x10
+
+Title: Archive old snapshots
+Priority: 020

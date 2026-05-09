@@ -100,6 +100,29 @@ public sealed class DirectFileServerV1TypedTests
     }
 
     [Fact]
+    public void RecSelTyped_WithIntFieldType_ReturnsTypedPriorityValues()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.IntFieldType);
+        var server = new DirectFileServerV1();
+
+        var result = server.RecSel_Typed(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Task" }
+            });
+
+        Assert.Equal(0, result.StatusCode);
+        Assert.Single(result.RecordSets);
+        var records = result.RecordSets[0].Records;
+        Assert.Equal(4, records.Length);
+        Assert.Equal("1", GetFieldValue(records[0], "Priority"));
+        Assert.Equal("-23", GetFieldValue(records[1], "Priority"));
+        Assert.Equal("0x10", GetFieldValue(records[2], "Priority"));
+        Assert.Equal("020", GetFieldValue(records[3], "Priority"));
+    }
+
+    [Fact]
     public void RecInsTyped_WithValidBook_ReturnsSuccessAndTypedRecordSet()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
@@ -224,6 +247,29 @@ public sealed class DirectFileServerV1TypedTests
 
         Assert.Equal(3, result.StatusCode);
         Assert.Equal("Invalid field line: %key Id", result.Message);
+        Assert.Empty(result.RecordSets);
+    }
+
+    [Fact]
+    public void RecInsTyped_WithInvalidIntFieldValue_ReturnsOperationErrorStatus()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongInvalidIntFieldType);
+        var server = new DirectFileServerV1();
+
+        var result = server.RecIns_Typed(
+            workingCopy.FilePath,
+            new RecInsOptions
+            {
+                RecordType = "Task",
+                RecordText =
+                """
+                Title: Added task
+                Priority: 3
+                """
+            });
+
+        Assert.Equal(4, result.StatusCode);
+        Assert.Contains("invalid int value 'high'", result.Message, StringComparison.Ordinal);
         Assert.Empty(result.RecordSets);
     }
 

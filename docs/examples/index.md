@@ -28,3 +28,7 @@ Shared examples in this directory are used for two purposes at the same time:
   - Intentionally invalid example showing a malformed field line without the `:` separator.
 - `docs/examples/8_multiple_record_types_single_file/`
   - Valid example showing multiple typed record sets in a single rec file.
+- `docs/examples/9_int_field_type/`
+  - Valid example showing `int` field type values in decimal, negative, hexadecimal, and octal forms.
+- `docs/examples/10_wrong_invalid_int_field_type/`
+  - Intentionally invalid example showing a value that violates a declared `int` field type.

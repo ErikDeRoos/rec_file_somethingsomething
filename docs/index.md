@@ -93,6 +93,14 @@ Shared example data used by documentation and tests.
   Explains the valid multiple-record-types single-file example and why it matters.
 - `docs/examples/8_multiple_record_types_single_file/people_and_residences.rec`  
   Valid example showing multiple typed record sets in a single rec file.
+- `docs/examples/9_int_field_type/README.md`  
+  Explains the valid int-typed field example and supported integer literal forms.
+- `docs/examples/9_int_field_type/tasks.rec`  
+  Valid example showing int-typed field values (decimal, negative, hexadecimal, octal).
+- `docs/examples/10_wrong_invalid_int_field_type/README.md`  
+  Explains the intentionally invalid int-type mismatch example and how to fix it.
+- `docs/examples/10_wrong_invalid_int_field_type/invalid_priority.rec`  
+  Invalid example showing a non-integer value in an int-typed field.
 
 ## Usage guidance
 - Put phase planning and delivery tracking in `docs/project/`.

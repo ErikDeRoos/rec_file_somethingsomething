@@ -121,6 +121,16 @@ internal sealed class RecValidator
             return;
         }
 
+        if (string.Equals(fieldType, "int", StringComparison.Ordinal))
+        {
+            if (!IsValidIntLiteral(field.Value))
+            {
+                errors.Add($"Record set '{recordSet.TypeName ?? string.Empty}' record {recordIndex} field '{field.Name}' has invalid int value '{field.Value}'.");
+            }
+
+            return;
+        }
+
         if (fieldType.StartsWith("enum ", StringComparison.Ordinal))
         {
             var allowedValues = fieldType[5..]
@@ -154,6 +164,65 @@ internal sealed class RecValidator
             {
                 errors.Add($"Record set '{recordSet.TypeName ?? string.Empty}' record {recordIndex} field '{field.Name}' references unknown key '{field.Value}' in '{targetType}'.");
             }
+        }
+    }
+
+    private static bool IsValidIntLiteral(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var text = value.Trim();
+        var sign = 1;
+
+        if (text[0] == '+' || text[0] == '-')
+        {
+            sign = text[0] == '-' ? -1 : 1;
+            text = text[1..];
+            if (text.Length == 0)
+            {
+                return false;
+            }
+        }
+
+        try
+        {
+            long parsed;
+            if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                var hexDigits = text[2..];
+                if (hexDigits.Length == 0)
+                {
+                    return false;
+                }
+
+                parsed = Convert.ToInt64(hexDigits, 16);
+            }
+            else if (text.Length > 1 && text[0] == '0')
+            {
+                if (text.Any(c => c is < '0' or > '7'))
+                {
+                    return false;
+                }
+
+                parsed = Convert.ToInt64(text, 8);
+            }
+            else
+            {
+                if (!long.TryParse(text, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out parsed))
+                {
+                    return false;
+                }
+            }
+
+            parsed *= sign;
+            return parsed >= int.MinValue && parsed <= int.MaxValue;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 }

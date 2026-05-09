@@ -71,4 +71,18 @@ public sealed class RecParserMalformedExampleTests
 
         Assert.Equal("Invalid field line: %key Id", exception.Message);
     }
+
+    [Fact]
+    public void Parse_WrongInvalidIntFieldType_ParsesStructureForLaterValidation()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.WrongInvalidIntFieldType);
+
+        var document = parser.Parse(text);
+
+        var recordSet = Assert.Single(document.RecordSets);
+        Assert.Equal("Task", recordSet.TypeName);
+        Assert.Equal("int", recordSet.Descriptor.FieldTypes["Priority"]);
+        Assert.Equal("high", recordSet.Records[0].Fields.Single(field => field.Name == "Priority").Value);
+    }
 }

@@ -155,4 +155,22 @@ public sealed class RecParserExampleTests
         Assert.Equal("42AbbeterWay", personRecordSet.Records[0].Fields.Single(field => field.Name == "Abode").Value);
         Assert.Equal("ChezGrampa", residenceRecordSet.Records[1].Fields.Single(field => field.Name == "Id").Value);
     }
+
+    [Fact]
+    public void Parse_IntFieldType_ReadsIntFieldTypeAndMultipleIntegerFormats()
+    {
+        var parser = new RecParser();
+        var text = RecExampleData.ReadAllText(RecExampleScenario.IntFieldType);
+
+        var document = parser.Parse(text);
+
+        var recordSet = Assert.Single(document.RecordSets);
+        Assert.Equal("Task", recordSet.TypeName);
+        Assert.Equal("int", recordSet.Descriptor.FieldTypes["Priority"]);
+        Assert.Equal(4, recordSet.Records.Count);
+        Assert.Equal("1", recordSet.Records[0].Fields.Single(field => field.Name == "Priority").Value);
+        Assert.Equal("-23", recordSet.Records[1].Fields.Single(field => field.Name == "Priority").Value);
+        Assert.Equal("0x10", recordSet.Records[2].Fields.Single(field => field.Name == "Priority").Value);
+        Assert.Equal("020", recordSet.Records[3].Fields.Single(field => field.Name == "Priority").Value);
+    }
 }

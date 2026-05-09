@@ -292,6 +292,25 @@ public sealed class DirectFileServerV1Tests
     }
 
     [Fact]
+    public void RecSel_IntFieldType_ReturnsRecordsWithIntTypedPriorityValues()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.IntFieldType);
+        var server = new DirectFileServerV1();
+
+        var output = server.RecSel(
+            workingCopy.FilePath,
+            new RecSelOptions
+            {
+                Type = new RecSelTypeOptions { RecordType = "Task" }
+            });
+
+        Assert.Contains("Priority: 1", output, StringComparison.Ordinal);
+        Assert.Contains("Priority: -23", output, StringComparison.Ordinal);
+        Assert.Contains("Priority: 0x10", output, StringComparison.Ordinal);
+        Assert.Contains("Priority: 020", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void RecDel_SimpleRecutilsBookExample_RemovesAllBookRecordsButKeepsDescriptor()
     {
         using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.SimpleRecutilsBookExample);
@@ -489,6 +508,27 @@ public sealed class DirectFileServerV1Tests
             }));
 
         Assert.Contains("invalid enum value 'pending'", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void RecIns_WrongInvalidIntFieldType_ThrowsValidationError()
+    {
+        using var workingCopy = RecExampleWorkingCopy.Create(RecExampleScenario.WrongInvalidIntFieldType);
+        var server = new DirectFileServerV1();
+
+        var exception = Assert.Throws<InvalidOperationException>(() => server.RecIns(
+            workingCopy.FilePath,
+            new RecInsOptions
+            {
+                RecordType = "Task",
+                RecordText =
+                """
+                Title: Added task
+                Priority: 3
+                """
+            }));
+
+        Assert.Contains("invalid int value 'high'", exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]
