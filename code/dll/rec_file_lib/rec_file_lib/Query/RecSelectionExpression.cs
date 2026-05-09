@@ -7,7 +7,29 @@ internal enum RecSelectionExpressionOperator
     Contains
 }
 
-internal sealed record class RecSelectionExpression(
+internal enum RecSelectionUnaryOperator
+{
+    Not
+}
+
+internal enum RecSelectionBinaryOperator
+{
+    And,
+    Or
+}
+
+internal abstract record class RecSelectionExpression;
+
+internal sealed record class RecSelectionComparisonExpression(
     string FieldName,
     RecSelectionExpressionOperator Operator,
-    string Value);
+    string Value) : RecSelectionExpression;
+
+internal sealed record class RecSelectionUnaryExpression(
+    RecSelectionUnaryOperator Operator,
+    RecSelectionExpression Operand) : RecSelectionExpression;
+
+internal sealed record class RecSelectionBinaryExpression(
+    RecSelectionExpression Left,
+    RecSelectionBinaryOperator Operator,
+    RecSelectionExpression Right) : RecSelectionExpression;

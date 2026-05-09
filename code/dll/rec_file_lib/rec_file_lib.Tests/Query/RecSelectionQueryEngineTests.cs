@@ -499,6 +499,87 @@ public sealed class RecSelectionQueryEngineTests
         Assert.Equal("1", GetFieldValue(result.Records[1], "Total"));
     }
 
+    [Fact]
+    public void Select_WithExpressionBooleanAnd_OnlyReturnsRecordsMatchingBothSides()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "Email ~ \"example.com\" && Abode = \"42AbbeterWay\""));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[1], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithExpressionBooleanOr_ReturnsRecordsMatchingEitherSide()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "Name = \"Mandy Nebel\" || Abode = \"ChezGrampa\""));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("Mandy Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[1], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithExpressionNot_NegatesInnerCondition()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(document, recordSet, CreateOptions(Expression: "!(Name = \"Mandy Nebel\")"));
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Records.Count);
+        Assert.Equal("Alfred Nebel", GetFieldValue(result.Records[0], "Name"));
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[1], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithExpressionParentheses_AppliesExplicitGrouping()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var result = engine.Select(
+            document,
+            recordSet,
+            CreateOptions(Expression: "(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\") && Abode = \"ChezGrampa\""));
+
+        Assert.NotNull(result);
+        Assert.Single(result.Records);
+        Assert.Equal("Ernest Wright", GetFieldValue(result.Records[0], "Name"));
+    }
+
+    [Fact]
+    public void Select_WithExpressionMissingClosingParenthesis_ThrowsFormatException()
+    {
+        var engine = new RecSelectionQueryEngine();
+        var document = CreatePeopleAndResidencesDocument();
+        var recordSet = document.RecordSets.Single(set => set.TypeName == "Person");
+
+        var exception = Assert.Throws<FormatException>(() =>
+            engine.Select(document, recordSet, CreateOptions(Expression: "(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\"")));
+
+        Assert.Equal("Invalid selection expression: '(Name = \"Mandy Nebel\" || Name = \"Ernest Wright\"'.", exception.Message);
+    }
+
     private static RecSelectionQueryOptions CreateOptions(
         IReadOnlySet<string>? ProjectedFields = null,
         IReadOnlySet<int>? SelectedIndexes = null,

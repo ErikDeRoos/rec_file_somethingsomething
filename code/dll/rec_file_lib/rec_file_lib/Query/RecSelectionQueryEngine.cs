@@ -285,6 +285,43 @@ internal sealed class RecSelectionQueryEngine
             return true;
         }
 
+        return EvaluateExpression(record, expression);
+    }
+
+    private static bool EvaluateExpression(RecRecord record, RecSelectionExpression expression)
+    {
+        return expression switch
+        {
+            RecSelectionComparisonExpression comparison => EvaluateComparison(record, comparison),
+            RecSelectionUnaryExpression unary => EvaluateUnary(record, unary),
+            RecSelectionBinaryExpression binary => EvaluateBinary(record, binary),
+            _ => false
+        };
+    }
+
+    private static bool EvaluateUnary(RecRecord record, RecSelectionUnaryExpression expression)
+    {
+        return expression.Operator switch
+        {
+            RecSelectionUnaryOperator.Not => !EvaluateExpression(record, expression.Operand),
+            _ => false
+        };
+    }
+
+    private static bool EvaluateBinary(RecRecord record, RecSelectionBinaryExpression expression)
+    {
+        return expression.Operator switch
+        {
+            RecSelectionBinaryOperator.And => EvaluateExpression(record, expression.Left)
+                && EvaluateExpression(record, expression.Right),
+            RecSelectionBinaryOperator.Or => EvaluateExpression(record, expression.Left)
+                || EvaluateExpression(record, expression.Right),
+            _ => false
+        };
+    }
+
+    private static bool EvaluateComparison(RecRecord record, RecSelectionComparisonExpression expression)
+    {
         foreach (var field in record.Fields)
         {
             if (!string.Equals(field.Name, expression.FieldName, StringComparison.Ordinal))

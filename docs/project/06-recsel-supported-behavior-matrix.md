@@ -9,7 +9,7 @@ This document defines the currently supported `RecSel(filePath, options)` subset
 | `-t` type | `options.Type.RecordType` | Yes |
 | `-n` number/indexes | `options.Select.Indexes` | Yes |
 | `-q` quick substring | `options.Select.Quick` | Yes |
-| `-e` expression | `options.Select.Expression` | Partial (`=`, `!=`, `~`) |
+| `-e` expression | `options.Select.Expression` | Partial (`=`, `!=`, `~`, `&&`, `||`, `!`, parentheses) |
 | `-j` join | `options.Select.JoinField` | Yes (inner join) |
 | `-p` print fields | `options.Project.FieldNames` | Yes |
 | `-G` group by | `options.Group.FieldNames` | Groundwork |
@@ -18,6 +18,20 @@ This document defines the currently supported `RecSel(filePath, options)` subset
 | `-U` uniq | `options.Select.Uniq` | Yes |
 | `-C` collapse | `options.Select.Collapse` | Yes |
 | `-d` include descriptors | `options.Select.IncludeDescriptors` | Yes |
+
+## Expression subset details
+
+Supported now:
+- comparisons: `Field = Value`, `Field != Value`, `Field ~ Value`
+- boolean composition: `expr1 && expr2`, `expr1 || expr2`, `!expr`
+- explicit grouping: `(expr)`
+
+Still not supported:
+- numeric/date comparisons (`<`, `<=`, `>`, `>=`, `==`)
+- arithmetic operators and ternary operator
+- field counter operator (`#Field`)
+- full recutils backtracking semantics across repeated fields
+- regex semantics for `~` (current behavior is ordinal substring contains)
 
 ## Explicit operation ordering
 
